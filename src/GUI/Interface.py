@@ -59,7 +59,7 @@ class Interface:
         self.button_list = [
             Button(self.left_box, text='FingerPrint List', command=self.screen.destroy, height=10, width=25,
                    state=DISABLED),
-            Button(self.left_box, text='Add FingerPrint', command=self.screen.destroy, height=10, width=25,
+            Button(self.left_box, text='Add FingerPrint', command=self.scanDemand, height=10, width=25,
                    state=DISABLED),
             Button(self.left_box, text='Set Position', command=self.set_position, height=10, width=25,
                    state=DISABLED),
@@ -67,6 +67,12 @@ class Interface:
         ]
         for b in self.button_list:
             b.pack(padx=1, pady=1, side='left')
+    
+    def scanDemand(self) :
+        if self.currentRobot is None :
+            return
+        else :
+            self.currentRobot.askScan()
 
     def move_right(self):
         self.canvas.move("all", -20, 0)

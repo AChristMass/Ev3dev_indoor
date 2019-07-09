@@ -5,11 +5,12 @@ import subprocess
 import sys
 import threading
 sys.path.append('../')
-from Common.request import Request
+from request import Request
 from uuid import getnode as get_mac
 
+# sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'
 
-class Client:
+class Client :
     server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     def __init__(self, host, port):
         self.host = host
@@ -22,6 +23,8 @@ class Client:
         self.pending = ""
         self.launched = True
         self.macAdress = hex(get_mac())
+        
+    
 
     def launch(self) :
         self.server_connection.send(b"ev3")
@@ -35,20 +38,14 @@ class Client:
             self.doRead()
         
         self.server_connection.close()
-
     #Scan and send to the server RSSI signaturen
     def scan(self, request) :
-        print("Launching scan...")
-        scan = "nmcli -t -f BSSID,SIGNAL dev wifi".split(" ")
-        rescan = "nmcli -t -f BSSID,SIGNAL dev wifi rescan".split(" ")
-        subprocess.run(rescan)
-        command = subprocess.run(scan, stdout=subprocess.PIPE)
-        lines = command.stdout.decode("utf-8").split("\n")[:-1]
-        self.server_connection.send(lines.encode())
+        scan = subprocess.check_output("echo maker | sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'", shell=True)
+        self.server_connection.send(b'3' + scan)
+        print("Scan sent")
 
     def doRead(self):
         recv = self.server_connection.recv(1024)
-        print("Just recv : ", recv)
         last = str(recv.decode())
         recv = str(recv.decode()).split("`")
 
@@ -68,16 +65,19 @@ class Client:
         for request in recv :
             self.processIn(request)
 
+        
     def processIn(self, request) :
         self.state = self.request.process(request)
         if self.state == Request.State.ERROR :
             print("Can't deal that kind of packets")
+
         
 
 def main():
-    host = "localhost"
+    host = "192.168.43.208"
     port = 12800
     client = Client(host, port)
+    print("Launching...")
     client.launch()
 
 
