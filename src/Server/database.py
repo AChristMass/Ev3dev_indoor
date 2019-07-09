@@ -16,10 +16,19 @@ class Database :
        
     #This one should only be implemnted into the client
     def scanFringerprint(self, lines) :
-        for line in lines:
+        print("adding scan to database")
+        lines  = lines.decode('utf-8').split("\n")
+        for i in range(0,int(len(lines)-1),3):
+            addr = lines[i].split(" ")[1]
+            signal = lines[i+1].split(" ")[1]
+            name = lines[i+2].split(" ")[1]
+            print(addr,signal,name)
+
+ 
+        """for line in lines:
             values = line.rsplit(":", 1)
             values[0] = values[0].replace('\\',"")
-            self.addOnDataBase(0, 0, values, 0)
+            self.addOnDataBase(0, 0, values, 0)"""
              
     def addOnDataBase(self, x, y, values, way):
         try:

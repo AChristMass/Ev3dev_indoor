@@ -22,14 +22,12 @@ class Server:
         self.contexts = dict() #Used to store one context for every client identified , a contexts is a class use to store data and action for a specific client.
         self.database = Database()
         print("Server launched on port : {}".format(port))
-        Server.logged.append(Ev3Context(None, self, "0.0.0.0"))
-        Server.logged[0].y = 100
 
     #Main loop, can register new clients and call processKey for each clients who can be read or write
     def launch(self):
         nb_clients = 0
-        while threading.current_thread().is_alive():
-            if len(self.connected_clients) != nb_clients:
+        while threading.current_thread().is_alive() :
+            if(len(self.connected_clients) != nb_clients ) : 
                 print("Connected clients : ", len(self.connected_clients))
                 nb_clients = len(self.connected_clients)
 
@@ -56,21 +54,20 @@ class Server:
         else:
             for client in clients_toRead:
                 try:
-                    addr = (str(client).split()[7] + " " + str(client).split()[8])[:-1].split("=")[1] #Extract the ip addr and port
-                    if self.contexts[addr] is None: #if no context is attached to a client
+                    addr = (str(client).split()[7]+ " " + str(client).split()[8])[:-1].split("=")[1] #Extract the ip addr and port
+                    if self.contexts[addr] is None : #if no context is attached to a client
                         Server.lock.acquire()
                         full_recv = str(client.recv(1024).decode()).split("`")
                         recv = full_recv[0]     
                         if recv == "ev3" :
-                            print(client)
                             self.contexts[addr] = Ev3Context(client, self, addr)
                             Server.logged.append(self.contexts[addr])
                             client.send("accepted".encode())
-                        else:
+                        else :
                             self.connected_clients.remove(client)
                             client.send("refused".encode())
                         Server.lock.release()
-                    else:
+                    else :
                         self.contexts[addr].doRead()  
                 except ConnectionResetError:
                     self.connected_clients.remove(client)
