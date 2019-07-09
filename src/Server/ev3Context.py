@@ -14,7 +14,7 @@ class Ev3Context :
         self.pending = "" #Use to store data from an incompleted frame (Like a from who would take two calls to SOCKET.recv() to be completed)
         self.request.register(1, lambda x : self.registerMacAdress(x[3:]))
         self.request.register(2, lambda x : print(x[1:]))
-        self.request.register(3, lambda x : self.server.database.scanFringerprint(x) )
+        self.request.register(3, lambda x : self.server.database.scanFringerprint(x[1:]) )
         self.x = 629
         self.y = 114
         self.macAddress = ""
