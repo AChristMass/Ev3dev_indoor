@@ -1,8 +1,8 @@
-import subprocess
 import sqlite3
 import os.path
 
-class Database :
+
+class Database:
     def __init__(self):
         if not os.path.isfile("../bdd/fingerPrint.db"):
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
