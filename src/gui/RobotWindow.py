@@ -12,7 +12,7 @@ class RobotWindow(Toplevel):
         b = Button(self, text="Ok", command=self.print_robot, width=20)
         u = Button(self, text="Unselect", command=self.unselect, width=20)
 
-        for i in range (len(self.mother.robotList)):
+        for i in range(len(self.mother.robotList)):
             self.box.insert(i, self.mother.robotList[i])
 
         self.box.pack()
@@ -39,7 +39,3 @@ class RobotWindow(Toplevel):
         self.mother.canvas.delete("all")
         self.mother.draw_map()
         self.destroy()
-
-
-
-
