@@ -7,7 +7,6 @@ from server.Server import Server
 
 
 class Interface:
-
     step = 10
 
     def __init__(self):
@@ -80,11 +79,20 @@ class Interface:
         ]
         for b in self.button_list:
             b.pack(padx=1, pady=1, side='left')
-    
-    def scanDemand(self) :
-        if self.currentRobot is None :
+
+    def add_robot(self):
+        print("")
+
+    def scanDemand(self):
+        if self.currentRobot is None:
             return
         self.currentRobot.askScan()
+
+    def showFingerPrint(self):
+        if self.currentRobot is None:
+            return
+        print("show fingerprint")
+        self.currentRobot.askFingerPrints()
 
     def move_right(self):
         self.canvas.move("all", -Interface.step, 0)
