@@ -1,0 +1,10 @@
+/.idea/
+/venv/
+/.vscode/
+/src/client/__pycache__/
+/src/common/__pycache__/
+/src/gui/__pycache__/
+/src/server/__pycache__/
+/src/test/__pycache__/
+
+*/*/.pyc

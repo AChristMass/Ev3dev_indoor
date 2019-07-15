@@ -1,10 +1,10 @@
-from GUI.Interface import Interface
-from Server.server import Server
 import threading
 
+from gui.Interface import Interface
+from server.Server import Server
 
-def main() :
 
+def main():
     host = ''
     port = 12800
     server = Server(host, port)
@@ -15,6 +15,8 @@ def main() :
     print("Launching GUI...")
     inter = Interface()
     inter.create_interface()
+
+
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 class Map:
     def __init__(self, name):
-        self.file = open("../map/"+name, "r")
+        self.file = open("../map/" + name, "r")
         self.map = self.load_map(self.file)
         self.y = len(self.map)
         self.x = len(self.map[0])

@@ -1,8 +1,9 @@
-from tkinter import *
-from GUI.RobotWindow import RobotWindow
-from Server.server import Server
-from GUI.Map import Map
 import platform
+from tkinter import *
+
+from gui.Map import Map
+from gui.RobotWindow import RobotWindow
+from server.Server import Server
 
 
 class Interface:
@@ -20,6 +21,7 @@ class Interface:
 
         self.maps = Frame(self.screen, width=self.width, height=self.height * 10 / 12, borderwidth=0, relief="solid")
         self.menu = Frame(self.screen, height=self.height * (2 / 12), borderwidth=2, relief="solid")
+
         self.left_box = Frame(self.menu, width=self.width * 2 / 3, borderwidth=1, relief="solid")
         self.right_box = Frame(self.menu, borderwidth=1, relief="solid")
         self.label_msg = Label(self.left_box, text="Select a Robot")
@@ -29,13 +31,16 @@ class Interface:
         self.screen.bind('<Escape>', lambda e: self.screen.destroy())
         self.screen.bind("<Left>", lambda e: self.move_left())
         self.screen.bind("<Up>", lambda e: self.move_up())
-        self.screen.bind("<Right>", lambda e:  self.move_right())
+        self.screen.bind("<Right>", lambda e: self.move_right())
         self.screen.bind("<Down>", lambda e: self.move_down())
         self.screen.bind("<p>", lambda e: self.zoom_up())
         self.screen.bind("<m>", lambda e: self.zoom_down())
         self.screen.bind("<1>", lambda e: self.on_click())
         self.screen.bind("<4>", lambda e: self.move_up())
         self.screen.bind("<5>", lambda e: self.move_down())
+        self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
+        self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
+        self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
 
         self.origin_x = 0
         self.origin_y = 0
@@ -43,11 +48,10 @@ class Interface:
         self.robot_point = None
         self.position_flag = False
         self.zoom = 1
-
+        self.currentRobot = None
         self.mapMat = self.load_map()
 
         self.button_list = []
-        self.currentRobot = None
         self.robotList = Server.logged
 
     def scroll(self):
@@ -56,6 +60,7 @@ class Interface:
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
         self.menu.pack(expand=True, fill="both", padx=0, pady=0)
+
         self.left_box.pack(side="left", expand=True, fill="both", padx=5, pady=5)
         self.right_box.pack(side="right", expand=True, fill="both", padx=5, pady=5)
         self.maps.propagate(0)
@@ -65,7 +70,7 @@ class Interface:
         Button(self.right_box, text='Add Robot', command=self.add_robot, height=2, width=100).pack(padx=1, pady=1)
         Button(self.right_box, text='Select Robot', command=self.set_robot, height=2, width=100).pack(padx=1, pady=1)
         self.button_list = [
-            Button(self.left_box, text='FingerPrint List', command=self.screen.destroy, height=10, width=25,
+            Button(self.left_box, text='FingerPrint List', command=self.showFingerPrint, height=10, width=25,
                    state=DISABLED),
             Button(self.left_box, text='Add FingerPrint', command=self.scanDemand, height=10, width=25,
                    state=DISABLED),
@@ -76,14 +81,10 @@ class Interface:
         for b in self.button_list:
             b.pack(padx=1, pady=1, side='left')
     
-    def scanDemand(self):
+    def scanDemand(self) :
         if self.currentRobot is None :
             return
-        else :
-            self.currentRobot.askScan()
-
-    def add_robot(self):
-        print("")
+        self.currentRobot.askScan()
 
     def move_right(self):
         self.canvas.move("all", -Interface.step, 0)
@@ -114,13 +115,13 @@ class Interface:
     def on_click(self):
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
-            if y > self.height * 10/12:
+            if y > self.height * 10 / 12:
                 return
-            x = int((x + self.origin_x)/self.zoom)
-            y = int((y + self.origin_y)/self.zoom)
+            x = int((x + self.origin_x) / self.zoom)
+            y = int((y + self.origin_y) / self.zoom)
             if y >= self.mapMat.y or x >= self.mapMat.x:
                 return
-            if self.mapMat.map[y][x-1] == 'X':
+            if self.mapMat.map[y][x - 1] == 'X':
                 return
             self.position_flag = False
             self.currentRobot.x = x
