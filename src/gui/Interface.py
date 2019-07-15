@@ -40,6 +40,7 @@ class Interface:
         self.screen.bind("<5>", lambda e: self.move_down())
         self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
+        self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
 
         self.origin_x = 0
         self.origin_y = 0

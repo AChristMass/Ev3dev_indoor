@@ -15,7 +15,8 @@ class Ev3Context:
         self.request.register(1, lambda x: self.registerMacAdress(x[3:]))
         self.request.register(2, lambda x: print(x[1:]))
         self.request.register(3, lambda x: self.server.database.scanFringerprint(x[1:], self))
-        self.request.register(4, lambda x: self.relativePosition(x[1:]))
+        self.request.register(4, lambda x: self.askScanForPosition_Callback(x[1:]))
+        self.request.register(5, lambda x: self.askDistance_Callback(x[1:]))
         self.x = 629
         self.y = 114
         self.macAddress = ""
@@ -47,16 +48,44 @@ class Ev3Context:
     def registerMacAdress(self, addr):
         self.macAddress = addr
 
+    """To make a fingerprint."""
+
     def askScan(self):
         self.client.send(b"3scan`")
-
-    def askScanForPosition(self):
-        self.client.send(b"4scan`")
 
     def showScans(self):
         self.server.database.printTable()
 
-    def relativePosition(self, scan):
+    """Attempt to calculate the metric distance between the client and the AP's scanned"""
+
+    def askDistance(self):
+        self.client.send(b"5distance`")
+
+    """Callback functions for "distance" """
+
+    def askDistance_Callback(self, scan):
+        currentPos = list()
+        scan = scan.split("\n")
+        MP = -45  # MP -> Expected measure for 1 meter distance.
+        n = 2  # N -> envorinemental factor.
+
+        for i in range(0, int(len(scan) - 1), 3):
+            addr = scan[i].split(" ")[1]
+            signal = scan[i + 1].split(" ")[1]
+            name = scan[i + 2].split(" ")[1]
+            currentPos.append((name, addr, signal))
+        for i in currentPos:
+            distance = 10 ** ((MP - int(float(i[2]))) / (10 * n))
+            print("Distance from ", i[0], " is :", distance)
+
+    """To find the position of the client."""
+
+    def askScanForPosition(self):
+        self.client.send(b"4scan`")
+
+    """Callback functions for "askScanForPosition" """
+
+    def askScanForPosition_Callback(self, scan):
         currentPos = list()
         scan = scan.split("\n")
         for i in range(0, int(len(scan) - 1), 3):
