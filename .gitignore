@@ -7,4 +7,4 @@
 /src/server/__pycache__/
 /src/test/__pycache__/
 
-*/*.pyc
+*/*/.pyc
