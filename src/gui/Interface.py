@@ -7,6 +7,9 @@ from server.Server import Server
 
 
 class Interface:
+
+    step = 10
+
     def __init__(self):
         self.screen = Tk()
         self.width = self.screen.winfo_screenwidth()
@@ -33,6 +36,8 @@ class Interface:
         self.screen.bind("<p>", lambda e: self.zoom_up())
         self.screen.bind("<m>", lambda e: self.zoom_down())
         self.screen.bind("<1>", lambda e: self.on_click())
+        self.screen.bind("<4>", lambda e: self.move_up())
+        self.screen.bind("<5>", lambda e: self.move_down())
         self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
 
@@ -48,6 +53,9 @@ class Interface:
         self.button_list = []
         self.robotList = Server.logged
 
+    def scroll(self):
+        print("???????")
+
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
         self.menu.pack(expand=True, fill="both", padx=0, pady=0)
@@ -58,7 +66,7 @@ class Interface:
         self.left_box.propagate(0)
 
     def set_up_buttons(self):
-        Button(self.right_box, text='Add Robot', command=self.screen.destroy, height=2, width=100).pack(padx=1, pady=1)
+        Button(self.right_box, text='Add Robot', command=self.add_robot, height=2, width=100).pack(padx=1, pady=1)
         Button(self.right_box, text='Select Robot', command=self.set_robot, height=2, width=100).pack(padx=1, pady=1)
         self.button_list = [
             Button(self.left_box, text='FingerPrint List', command=self.showFingerPrint, height=10, width=25,
@@ -71,33 +79,27 @@ class Interface:
         ]
         for b in self.button_list:
             b.pack(padx=1, pady=1, side='left')
-
-    def scanDemand(self):
-        if self.currentRobot is None:
+    
+    def scanDemand(self) :
+        if self.currentRobot is None :
             return
         self.currentRobot.askScan()
 
-    def showFingerPrint(self):
-        if self.currentRobot is None:
-            return
-        print("show fingerprint")
-        self.currentRobot.askFingerPrints()
-
     def move_right(self):
-        self.canvas.move("all", -20, 0)
-        self.origin_x -= (-20)
+        self.canvas.move("all", -Interface.step, 0)
+        self.origin_x -= -Interface.step
 
     def move_left(self):
-        self.canvas.move("all", 20, 0)
-        self.origin_x -= 20
+        self.canvas.move("all", Interface.step, 0)
+        self.origin_x -= Interface.step
 
     def move_up(self):
-        self.canvas.move("all", 0, 20)
-        self.origin_y -= 20
+        self.canvas.move("all", 0, Interface.step)
+        self.origin_y -= Interface.step
 
     def move_down(self):
-        self.canvas.move("all", 0, -20)
-        self.origin_y -= (-20)
+        self.canvas.move("all", 0, -Interface.step)
+        self.origin_y -= -Interface.step
 
     def zoom_up(self):
         if self.zoom != 8:

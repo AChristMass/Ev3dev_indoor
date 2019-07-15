@@ -11,6 +11,7 @@ class RobotWindow(Toplevel):
         self.box.pack(fill="both", expand=YES)
         b = Button(self, text="Ok", command=self.print_robot, width=20)
         u = Button(self, text="Unselect", command=self.unselect, width=20)
+        self.bind('<Escape>', lambda e: self.destroy())
 
         for i in range(len(self.mother.robotList)):
             self.box.insert(i, self.mother.robotList[i])
@@ -18,6 +19,8 @@ class RobotWindow(Toplevel):
         self.box.pack()
         u.pack(padx=1, pady=1, side='left')
         b.pack(padx=1, pady=1, side='right')
+        if not self.mother.robotList:
+            b.configure(state=DISABLED)
         self.frame.pack()
 
     def unselect(self):
