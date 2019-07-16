@@ -1,5 +1,5 @@
 from common.Request import Request
-
+from functools import reduce
 
 class Ev3Context:
 
@@ -67,7 +67,7 @@ class Ev3Context:
         currentPos = list()
         scan = scan.split("\n")
         MP = -45  # MP -> Expected measure for 1 meter distance.
-        n = 2  # N -> envorinemental factor.
+        N = 2.7  # N -> envorinemental factor.
 
         for i in range(0, int(len(scan) - 1), 3):
             addr = scan[i].split(" ")[1]
@@ -75,8 +75,10 @@ class Ev3Context:
             name = scan[i + 2].split(" ")[1]
             currentPos.append((name, addr, signal))
         for i in currentPos:
-            distance = 10 ** ((MP - int(float(i[2]))) / (10 * n))
-            print("Distance from ", i[0], " is :", distance)
+            signal = int(float(i[2]))
+
+            distance = 10 ** ((MP - signal) / (10 * N))
+            print("Distance from ", i[0], " is :", distance, "meters, dBm = ", i[2])
 
     """To find the position of the client."""
 
@@ -86,15 +88,72 @@ class Ev3Context:
     """Callback functions for "askScanForPosition" """
 
     def askScanForPosition_Callback(self, scan):
-        currentPos = list()
+        currentFingerprint = list()  # ('70:28:8b:d4:53:49', -71)
+        fingerprints = list()  # (711, 110, '70:28:8b:d4:53:49', -71)
         scan = scan.split("\n")
+        x = -1
+        y = -1
         for i in range(0, int(len(scan) - 1), 3):
             addr = scan[i].split(" ")[1]
             signal = scan[i + 1].split(" ")[1]
-            currentPos.append((addr, signal))
-
+            currentFingerprint.append((addr, signal))
         scans = self.server.database.getScans()
-        self.knn(3, currentPos, scans)
+
+        # The next line order scans by fingerprints
+        for i in range(-1, len(scans) - 1):
+            if x != scans[i][0] or y != scans[i][1]:
+                x = scans[i][0]
+                y = scans[i][1]
+                i += 1
+                fg = [scans[i]]
+                fingerprints.append(fg)
+
+            else:
+                fingerprints[len(fingerprints) - 1].append(scans[i])
+        fingerprint_With_Value = list()
+        for fg in fingerprints:
+            fingerprint_With_Value.append(self.fingerprintValue(currentFingerprint, fg))
+
+        sorted_fingerprints = sorted(fingerprint_With_Value, key=lambda x: x[0])
+
+        print(sorted_fingerprints)
+        if len(sorted_fingerprints) > 7 :
+            sorted_fingerprints = sorted_fingerprints[:7]
+        pos = self.relative_position(sorted_fingerprints)
+
+        print("Relative position is : ", pos)
+        self.x = pos[0]
+        self.y = pos[1]
+
+    """ Return a value corresponding to a fingerprint, this value is used to order fingerprints"""
+
+    def relative_position(self, positions):
+        # One position --> (0.015215327576699661, 629, 114) -> Coef | x | y
+        div = 0
+        for pos in positions :
+            div += pos[0]
+        x = 0
+        y = 0
+        for pos in positions :
+            x += pos[0] * pos[1]
+            y += pos[0] * pos[2]
+        return (x/div , y /div)
+
+    def fingerprintValue(self, current_fingerprint, fingerprint):
+        current_scan = dict()
+        for scan in current_fingerprint:
+            current_scan[scan[0]] = 10 ** (int(float(scan[1])) / 10)
+
+        value = 0
+        for scan in fingerprint:
+            try:
+                if current_scan[scan[2]] is not None:
+                    watt = 10 ** (int(float(scan[3])) / 10)
+                    value += ((current_scan[scan[2]] - watt) * (current_scan[scan[2]] - watt)) / (
+                            current_scan[scan[2]] * watt)
+            except KeyError:
+                pass
+        return (value / len(fingerprint)), fingerprint[0][0], fingerprint[0][1]
 
     def valAbs(self, x):
         return x if x > 0 else -x

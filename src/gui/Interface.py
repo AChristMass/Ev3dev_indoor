@@ -7,7 +7,7 @@ from server.Server import Server
 
 
 class Interface:
-    step = 10
+    step = 30
 
     def __init__(self):
         self.screen = Tk()
