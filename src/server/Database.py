@@ -10,6 +10,7 @@ class Database:
             print("Initialising Database...")
             self.cmd.execute(
                 "create table signals (x integer, y integer, bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
+            self.cmd.execute("create table fingerprints (x interger, y interger, PRIMARY KEY(x, y))")
         else:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
@@ -51,7 +52,7 @@ class Database:
         scans = list()
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
-        self.cmd.execute('select * from signals')
+        self.cmd.execute('select * from signals ORDER BY x, y')
         for i in self.cmd:
             scans.append(i[:-1])
         return
@@ -64,3 +65,24 @@ class Database:
         for i in self.cmd:
             lst.append(i)
         return lst
+
+        return scans
+
+    def getFingerprints(self):
+        scans = self.getScans()
+        fingerprints = list()
+        x = y = -1
+
+        for i in range(0, len(scans) - 1):
+            if x != scans[i][0] or y != scans[i][1]:
+                x = scans[i][0]
+                y = scans[i][1]
+                i += 1
+                fg = [scans[i]]
+                fingerprints.append(fg)
+
+            else:
+                fingerprints[len(fingerprints) - 1].append(scans[i])
+
+        return fingerprints
+
