@@ -11,7 +11,7 @@ class Server:
     lock = threading.Lock()
     logged = list()  # Store connected client with an active context
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, database):
         self.host = host
         self.port = port
         self.server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,7 +21,7 @@ class Server:
         self.server_launched = True
         self.connected_clients = []  # Used to store each client who have requested a connection
         self.contexts = dict()  # Used to store one context for every client identified , a contexts is a class use to store data and action for a specific client.
-        self.database = Database()
+        self.database = database
         print("Server launched on port : {}".format(port))
 
     # Main loop, can register new clients and call processKey for each clients who can be read or write

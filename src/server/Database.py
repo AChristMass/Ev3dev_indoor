@@ -54,4 +54,13 @@ class Database:
         self.cmd.execute('select * from signals')
         for i in self.cmd:
             scans.append(i[:-1])
-        return scans
+        return
+
+    def get_fp_list(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('select DISTINCT x, y from signals')
+        lst = []
+        for i in self.cmd:
+            lst.append(i)
+        return lst

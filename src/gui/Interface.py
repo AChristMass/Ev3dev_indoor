@@ -7,9 +7,12 @@ from server.Server import Server
 
 
 class Interface:
-    step = 10
+    step = 20
 
-    def __init__(self):
+    def __init__(self, database):
+
+        self.database = database
+
         self.screen = Tk()
         self.width = self.screen.winfo_screenwidth()
         self.height = self.screen.winfo_screenheight()
@@ -28,15 +31,16 @@ class Interface:
         self.canvas = Canvas(self.maps)
 
         self.screen.bind('<Escape>', lambda e: self.screen.destroy())
-        self.screen.bind("<Left>", lambda e: self.move_left())
-        self.screen.bind("<Up>", lambda e: self.move_up())
-        self.screen.bind("<Right>", lambda e: self.move_right())
-        self.screen.bind("<Down>", lambda e: self.move_down())
-        self.screen.bind("<p>", lambda e: self.zoom_up())
-        self.screen.bind("<m>", lambda e: self.zoom_down())
-        self.screen.bind("<1>", lambda e: self.on_click())
-        self.screen.bind("<4>", lambda e: self.move_up())
-        self.screen.bind("<5>", lambda e: self.move_down())
+        self.screen.bind("<Left>", lambda e: self.__move_left())
+        self.screen.bind("<Up>", lambda e: self.__move_up())
+        self.screen.bind("<Right>", lambda e: self.__move_right())
+        self.screen.bind("<Down>", lambda e: self.__move_down())
+        self.screen.bind("<space>", lambda e: self.show_finger_print())
+        self.screen.bind("<p>", lambda e: self.__zoom_up())
+        self.screen.bind("<m>", lambda e: self.__zoom_down())
+        self.screen.bind("<1>", lambda e: self.__on_click())
+        self.screen.bind("<4>", lambda e: self.__move_up())
+        self.screen.bind("<5>", lambda e: self.__move_down())
         self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
         self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
@@ -53,8 +57,10 @@ class Interface:
         self.button_list = []
         self.robotList = Server.logged
 
-    def scroll(self):
-        print("???????")
+        self.fingerPrintList = self.database.get_fp_list()
+        self.is_finger_print_visible = False
+
+        self.fp_draw_list = []
 
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
@@ -69,9 +75,9 @@ class Interface:
         Button(self.right_box, text='Add Robot', command=self.add_robot, height=2, width=100).pack(padx=1, pady=1)
         Button(self.right_box, text='Select Robot', command=self.set_robot, height=2, width=100).pack(padx=1, pady=1)
         self.button_list = [
-            Button(self.left_box, text='FingerPrint List', command=self.showFingerPrint, height=10, width=25,
-                   state=DISABLED),
-            Button(self.left_box, text='Add FingerPrint', command=self.scanDemand, height=10, width=25,
+            Button(self.left_box, text='FingerPrint List', command=self.show_finger_print, height=10, width=25,
+                   state=ACTIVE),
+            Button(self.left_box, text='Add FingerPrint', command=self.scan_request, height=10, width=25,
                    state=DISABLED),
             Button(self.left_box, text='Set Position', command=self.set_position, height=10, width=25,
                    state=DISABLED),
@@ -81,46 +87,62 @@ class Interface:
             b.pack(padx=1, pady=1, side='left')
 
     def add_robot(self):
-        print("")
+        return self
 
-    def scanDemand(self):
+    def scan_request(self):
         if self.currentRobot is None:
             return
         self.currentRobot.askScan()
 
-    def showFingerPrint(self):
-        if self.currentRobot is None:
-            return
-        print("show fingerprint")
-        self.currentRobot.askFingerPrints()
+    def show_finger_print(self):
+        if self.is_finger_print_visible:
+            self.is_finger_print_visible = False
+            print("hide fingerprint")
+            self.button_list[0]["borderwidth"] = 1
+            for i in self.fp_draw_list:
+                self.canvas.delete(i)
+        else:
+            self.is_finger_print_visible = True
+            print("show fingerprint")
+            print(self.fingerPrintList)
+            for i in self.fp_draw_list:
+                self.canvas.delete(i)
+            self.fp_draw_list = []
+            for pos in self.fingerPrintList:
+                self.fp_draw_list.append(
+                    self.canvas.create_rectangle((-self.origin_x/self.zoom + pos[0]) * self.zoom,
+                                                 (-self.origin_y/self.zoom + pos[1]) * self.zoom, (-self.origin_x/self.zoom + pos[0] + 1)
+                                                 * self.zoom, (-self.origin_y/self.zoom + pos[1] + 1) * self.zoom, outline="blue",
+                                                 fill="blue"))
+            self.button_list[0]["borderwidth"] = 5
 
-    def move_right(self):
+    def __move_right(self):
         self.canvas.move("all", -Interface.step, 0)
         self.origin_x -= -Interface.step
 
-    def move_left(self):
+    def __move_left(self):
         self.canvas.move("all", Interface.step, 0)
         self.origin_x -= Interface.step
 
-    def move_up(self):
+    def __move_up(self):
         self.canvas.move("all", 0, Interface.step)
         self.origin_y -= Interface.step
 
-    def move_down(self):
+    def __move_down(self):
         self.canvas.move("all", 0, -Interface.step)
         self.origin_y -= -Interface.step
 
-    def zoom_up(self):
+    def __zoom_up(self):
         if self.zoom != 8:
             self.zoom += 1
         self.draw_map()
 
-    def zoom_down(self):
+    def __zoom_down(self):
         if self.zoom != 1:
             self.zoom -= 1
         self.draw_map()
 
-    def on_click(self):
+    def __on_click(self):
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
             if y > self.height * 10 / 12:
@@ -191,9 +213,9 @@ class Interface:
                              -self.currentRobot.y * self.zoom + hauteur / 2)
             self.origin_x -= -self.currentRobot.x * self.zoom + largeur / 2
             self.origin_y -= -self.currentRobot.y * self.zoom + hauteur / 2
+        if self.fp_draw_list:
+            for pos in self.fingerPrintList:
+                self.fp_draw_list.append(
+                    self.canvas.create_rectangle(pos[0] * self.zoom, pos[1] * self.zoom, (pos[0] + 1)
+                                                 * self.zoom, (pos[1] + 1) * self.zoom, outline="blue", fill="blue"))
         self.canvas.pack(fill=BOTH, expand=True)
-
-
-if __name__ == '__main__':
-    inter = Interface()
-    inter.create_interface()

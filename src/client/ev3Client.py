@@ -3,7 +3,7 @@ import socket
 import subprocess
 from uuid import getnode as get_mac
 
-from Request import Request
+from client.Request import Request
 
 
 # sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'
