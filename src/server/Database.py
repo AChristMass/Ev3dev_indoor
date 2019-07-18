@@ -56,3 +56,22 @@ class Database:
         for i in self.cmd:
             scans.append(i[:-1])
         return scans
+
+    def getFingerprints(self):
+        scans = self.getScans()
+        fingerprints = list()
+        x = y = -1
+
+        for i in range(0, len(scans) - 1):
+            if x != scans[i][0] or y != scans[i][1]:
+                x = scans[i][0]
+                y = scans[i][1]
+                i += 1
+                fg = [scans[i]]
+                fingerprints.append(fg)
+
+            else:
+                fingerprints[len(fingerprints) - 1].append(scans[i])
+
+        return fingerprints
+
