@@ -39,16 +39,12 @@ class Chessboard:
         if self.selected_area is not None:
             self.areas_list[self.selected_area].undraw_boxes(self.zoom)
 
-        box_height = self.height  * self.zoom
-        box_width = self.width * self.zoom
+        nb_cols = int(self.height/self.ypas)
 
-        cols = int(y / box_height)
-        rows = int(x / box_width)
-        print("rows :", rows)
-        print("cols :", cols)
-        print("nb case :", self.width/self.xpas)
+        cols = int(y / self.ypas)
+        rows = int(x / self.xpas)
 
-        box_number = int(rows * (self.width) + cols)
+        box_number = int(rows * nb_cols + cols)
 
         box = self.boxes[box_number]
         self.selected_box = box
