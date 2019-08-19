@@ -48,7 +48,8 @@ class Interface:
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
         self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
         self.screen.bind("<a>", lambda e: self.chessboard.create_area())
-        self.screen.bind("<z>", lambda e: self.add_box_to_area())
+        self.screen.bind("<z>", lambda e: self.chessboard.add_box_to_area())
+        self.screen.bind("<e>", lambda e: self.chessboard.remove_box_from_area())
 
 
         self.origin_x = 0
@@ -58,11 +59,14 @@ class Interface:
         self.position_flag = False
         self.selected_box = None
         self.zoom = 1
-        self.chessboard = Chessboard(self.width, self.height, self.canvas, self.zoom, self.origin_x, self.origin_y)
+
 
 
         self.currentRobot = None
         self.mapMat = self.load_map()
+        print(self.mapMat.x)
+        print(self.mapMat.y)
+        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y)
 
         self.button_list = []
         self.robotList = Server.logged
@@ -139,10 +143,12 @@ class Interface:
     def __move_up(self):
         self.canvas.move("all", 0, Interface.step)
         self.origin_y -= Interface.step
+        self.chessboard.originy = self.origin_y
 
     def __move_down(self):
         self.canvas.move("all", 0, -Interface.step)
         self.origin_y -= -Interface.step
+        self.chessboard.originy = self.origin_y
 
     def __zoom_up(self):
         if self.zoom != 8:
@@ -157,8 +163,6 @@ class Interface:
         self.draw_map()
 
     def __on_click(self):
-
-
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
             if y > self.height * 10 / 12:
@@ -176,8 +180,8 @@ class Interface:
             self.draw_map()
             return
         x, y = self.screen.winfo_pointerxy()
-        x = int(x + self.origin_x)
-        y = int(y + self.origin_y)
+        #x = int((x + self.origin_x) / self.zoom)
+        #y = int((y + self.origin_y) / self.zoom)
 
         #Those 2 next calls have to be made in that order
         #cause the field selected_box of chessboard
@@ -185,9 +189,6 @@ class Interface:
         self.chessboard.select_box(x, y)
         self.selected_box = self.chessboard.selected_box
 
-
-    def add_box_to_area(self):
-        self.chessboard.add_box_to_area()
 
 
     def create_interface(self):

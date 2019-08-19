@@ -6,6 +6,9 @@ class Area:
     def add_box(self, box):
         self.boxes.append(box)
 
+    def remove_box(self, box):
+        self.boxes.remove(box)
+
     def draw_boxes(self, zoom):
         for i in self.boxes:
             i.draw_box_area(zoom)
