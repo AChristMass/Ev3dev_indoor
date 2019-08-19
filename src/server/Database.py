@@ -21,7 +21,9 @@ class Database:
         for i in range(0, int(len(lines) - 1), 3):
             addr = lines[i].split(" ")[1]
             signal = lines[i + 1].split(" ")[1]
-            # name = lines[i+2].split(" ")[1]
+            name = lines[i+2].split(" ")[1]
+            if name == "OnePlus":
+                continue
             self.addOnDataBase(context.x, context.y, addr, signal, 0)
 
     def addOnDataBase(self, x, y, bssid, signal, way):
@@ -55,7 +57,7 @@ class Database:
         self.cmd.execute('select * from signals ORDER BY x, y')
         for i in self.cmd:
             scans.append(i[:-1])
-        return
+        return scans
 
     def get_fp_list(self):
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')

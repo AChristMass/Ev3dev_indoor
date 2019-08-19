@@ -1,6 +1,8 @@
 import platform
 from tkinter import *
 
+from gui.Chessboard import Chessboard
+from gui.Area import Area
 from gui.Map import Map
 from gui.RobotWindow import RobotWindow
 from server.Server import Server
@@ -16,6 +18,7 @@ class Interface:
         self.screen = Tk()
         self.width = self.screen.winfo_screenwidth()
         self.height = self.screen.winfo_screenheight()
+
         if platform.system() == 'Darwin':
             self.screen.tk.call("::tk::unsupported::MacWindowStyle", "style", self.screen._w, "plain", "none")
         self.screen.attributes('-fullscreen', True)
@@ -44,13 +47,20 @@ class Interface:
         self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
         self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
+        self.screen.bind("<a>", lambda e: self.chessboard.create_area())
+        self.screen.bind("<z>", lambda e: self.add_box_to_area())
+
 
         self.origin_x = 0
         self.origin_y = 0
 
         self.robot_point = None
         self.position_flag = False
+        self.selected_box = None
         self.zoom = 1
+        self.chessboard = Chessboard(self.width, self.height, self.canvas, self.zoom, self.origin_x, self.origin_y)
+
+
         self.currentRobot = None
         self.mapMat = self.load_map()
 
@@ -92,37 +102,39 @@ class Interface:
     def scan_request(self):
         if self.currentRobot is None:
             return
+        self.fingerPrintList.append((self.currentRobot.x, self.currentRobot.y))
         self.currentRobot.askScan()
 
     def show_finger_print(self):
         if self.is_finger_print_visible:
             self.is_finger_print_visible = False
-            print("hide fingerprint")
             self.button_list[0]["borderwidth"] = 1
             for i in self.fp_draw_list:
                 self.canvas.delete(i)
         else:
             self.is_finger_print_visible = True
-            print("show fingerprint")
-            print(self.fingerPrintList)
             for i in self.fp_draw_list:
                 self.canvas.delete(i)
             self.fp_draw_list = []
             for pos in self.fingerPrintList:
                 self.fp_draw_list.append(
-                    self.canvas.create_rectangle((-self.origin_x/self.zoom + pos[0]) * self.zoom,
-                                                 (-self.origin_y/self.zoom + pos[1]) * self.zoom, (-self.origin_x/self.zoom + pos[0] + 1)
-                                                 * self.zoom, (-self.origin_y/self.zoom + pos[1] + 1) * self.zoom, outline="blue",
+                    self.canvas.create_rectangle((-self.origin_x / self.zoom + pos[0]) * self.zoom,
+                                                 (-self.origin_y / self.zoom + pos[1]) * self.zoom,
+                                                 (-self.origin_x / self.zoom + pos[0] + 1)
+                                                 * self.zoom, (-self.origin_y / self.zoom + pos[1] + 1) * self.zoom,
+                                                 outline="blue",
                                                  fill="blue"))
             self.button_list[0]["borderwidth"] = 5
 
     def __move_right(self):
         self.canvas.move("all", -Interface.step, 0)
         self.origin_x -= -Interface.step
+        self.chessboard.originx = self.origin_x
 
     def __move_left(self):
         self.canvas.move("all", Interface.step, 0)
         self.origin_x -= Interface.step
+        self.chessboard.originx = self.origin_x
 
     def __move_up(self):
         self.canvas.move("all", 0, Interface.step)
@@ -135,14 +147,18 @@ class Interface:
     def __zoom_up(self):
         if self.zoom != 8:
             self.zoom += 1
+            self.chessboard.zoom += 1
         self.draw_map()
 
     def __zoom_down(self):
         if self.zoom != 1:
             self.zoom -= 1
+            self.chessboard.zoom -= 1
         self.draw_map()
 
     def __on_click(self):
+
+
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
             if y > self.height * 10 / 12:
@@ -158,6 +174,21 @@ class Interface:
             self.currentRobot.y = y
             self.button_list[2]["borderwidth"] = 1
             self.draw_map()
+            return
+        x, y = self.screen.winfo_pointerxy()
+        x = int(x + self.origin_x)
+        y = int(y + self.origin_y)
+
+        #Those 2 next calls have to be made in that order
+        #cause the field selected_box of chessboard
+        #is updated in the function "select_box"
+        self.chessboard.select_box(x, y)
+        self.selected_box = self.chessboard.selected_box
+
+
+    def add_box_to_area(self):
+        self.chessboard.add_box_to_area()
+
 
     def create_interface(self):
         self.set_up_lines()
@@ -185,6 +216,7 @@ class Interface:
         self.origin_y = 0
         self.origin_x = 0
         self.canvas.delete("all")
+
         largeur = self.width
         hauteur = int(self.height * (10 / 12))
         self.canvas.create_rectangle(0, 0, self.mapMat.x * self.zoom,
@@ -218,4 +250,5 @@ class Interface:
                 self.fp_draw_list.append(
                     self.canvas.create_rectangle(pos[0] * self.zoom, pos[1] * self.zoom, (pos[0] + 1)
                                                  * self.zoom, (pos[1] + 1) * self.zoom, outline="blue", fill="blue"))
+        self.chessboard.draw_boxes()
         self.canvas.pack(fill=BOTH, expand=True)
