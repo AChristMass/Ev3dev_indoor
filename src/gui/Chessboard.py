@@ -68,7 +68,7 @@ class Chessboard:
         area = box.get_area()
 
         if area is not None:
-            self.areas_list[area].draw_boxes(self.zoom)
+            self.areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
             self.selected_area = box.get_area()
 
     def create_area(self):
