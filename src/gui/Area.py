@@ -8,7 +8,7 @@ class Area:
 
     def remove_box(self, box):
         self.boxes.remove(box)
-
+        
     def draw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
             i.draw_box_area(zoom, originx, originy)
