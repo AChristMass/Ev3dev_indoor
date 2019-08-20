@@ -216,6 +216,8 @@ class Interface:
     def draw_map(self):
         self.origin_y = 0
         self.origin_x = 0
+        self.chessboard.originx = 0
+        self.chessboard.originy = 0
         self.canvas.delete("all")
 
         largeur = self.width
