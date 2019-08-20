@@ -50,22 +50,20 @@ class Interface:
         self.screen.bind("<a>", lambda e: self.chessboard.create_area())
         self.screen.bind("<z>", lambda e: self.chessboard.add_box_to_area())
         self.screen.bind("<e>", lambda e: self.chessboard.remove_box_from_area())
-
+        self.screen.bind("<h>", lambda e: self.hide_show_chassboard())
+        self.screen.bind("<r>", lambda e: self.chessboard.clear_areas())
 
         self.origin_x = 0
         self.origin_y = 0
 
         self.robot_point = None
         self.position_flag = False
+        self.chessboard_flag = False
         self.selected_box = None
         self.zoom = 1
 
-
-
         self.currentRobot = None
         self.mapMat = self.load_map()
-        print(self.mapMat.x)
-        print(self.mapMat.y)
         self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y)
 
         self.button_list = []
@@ -75,6 +73,14 @@ class Interface:
         self.is_finger_print_visible = False
 
         self.fp_draw_list = []
+
+    def hide_show_chassboard(self):
+        if self.chessboard_flag is False :
+            self.chessboard_flag = True
+        else :
+            self.chessboard_flag = False
+
+        self.draw_map()
 
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
@@ -179,15 +185,14 @@ class Interface:
             self.button_list[2]["borderwidth"] = 1
             self.draw_map()
             return
-        x, y = self.screen.winfo_pointerxy()
-        #x = int((x + self.origin_x) / self.zoom)
-        #y = int((y + self.origin_y) / self.zoom)
+        if self.chessboard_flag is not False :
+            x, y = self.screen.winfo_pointerxy()
 
-        #Those 2 next calls have to be made in that order
-        #cause the field selected_box of chessboard
-        #is updated in the function "select_box"
-        self.chessboard.select_box(x, y)
-        self.selected_box = self.chessboard.selected_box
+            #Those 2 next calls have to be made in that order
+            #cause the field selected_box of chessboard
+            #is updated in the function "select_box"
+            self.chessboard.select_box(x, y)
+            self.selected_box = self.chessboard.selected_box
 
 
 
@@ -253,5 +258,6 @@ class Interface:
                 self.fp_draw_list.append(
                     self.canvas.create_rectangle(pos[0] * self.zoom, pos[1] * self.zoom, (pos[0] + 1)
                                                  * self.zoom, (pos[1] + 1) * self.zoom, outline="blue", fill="blue"))
-        self.chessboard.draw_boxes()
+        if self.chessboard_flag is not False :
+            self.chessboard.draw_boxes()
         self.canvas.pack(fill=BOTH, expand=True)

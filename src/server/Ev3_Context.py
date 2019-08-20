@@ -88,13 +88,19 @@ class Ev3Context:
     """Callback functions for "askScanForPosition" """
 
     def askScanForPosition_Callback(self, scan):
-        N = 5  # number of fingerprint used
+        N = 7  # number of fingerprint used
         current_fingerprint = list()  # One scan from current_fingerprint =  ('70:28:8b:d4:53:49', -71)
         scan = scan.split("\n")
+        print("Current fg = ")
         for i in range(0, int(len(scan) - 1), 3):
             addr = scan[i].split(" ")[1]
             signal = scan[i + 1].split(" ")[1]
+            name = scan[i+2].split(" ")[1]
+            if name == "OnePlus" :
+                continue
             current_fingerprint.append((addr, signal))
+            print("addr : ", addr)
+
         fingerprints = self.server.database.getFingerprints()  # One scan from fingerprints = (711, 110, '70:28:8b:d4:53:49', -71)
 
         self.print_difference_between_current_and_dbfg(current_fingerprint, fingerprints)
@@ -128,7 +134,9 @@ class Ev3Context:
         for pos in positions:
             x += pos[0] * pos[1]
             y += pos[0] * pos[2]
-        return (x / div, y / div)
+        if div > 0:
+            return (x / div, y / div)
+        return x, y
 
     def print_difference_between_current_and_dbfg(self, current_fingerprint, fingerprints):
         # One scan from current_fingerprint =  ('70:28:8b:d4:53:49', -71)
@@ -146,7 +154,8 @@ class Ev3Context:
                 try:
                     if current_scan[scan[2]] is not None:
                         diff += self.valAbs(int(float(current_scan[scan[2]])) - scan[3])
-                        print("Device : ", scan[2], "(", scan[0], ":", scan[1], ") CurrentS : ", current_scan[scan[2]],
+                        print("Device :", scan[2], " | (", scan[0], ":", scan[1], ") | CurrentS : ",
+                              current_scan[scan[2]],
                               " RegisterS : ", scan[3])
                 except KeyError:
                     pass
@@ -155,21 +164,26 @@ class Ev3Context:
     def fingerprintValue2(self, current_fingerprint, fingerprint):
         # One scan from current_fingerprint =  ('70:28:8b:d4:53:49', -71)
         # One scan from fingerprints = (711, 110, '70:28:8b:d4:53:49', -71)
+
         current_scan = dict()
         for scan in current_fingerprint:
             current_scan[scan[0]] = scan[1]
-        count = 0
+
+        count = 1
         value = 0
+
         for scan in fingerprint:
             try:
                 if current_scan[scan[2]] is not None:
+                    count +=1
                     value += self.valAbs(int(float(current_scan[scan[2]])) - scan[3])
             except KeyError:
-                count +=1
-                value -= 100
+                pass
 
-        print("Pour (", fingerprint[0][0]," : ",fingerprint[0][1], ") count = ", count)
-        return (3 ** ((100 - self.valAbs(value)) / 10)), fingerprint[0][0], fingerprint[0][1]
+        print("count = ", count)
+        if value > 0:
+            return (3 ** ((100 - self.valAbs(value)) / 10)) * count, fingerprint[0][0], fingerprint[0][1]
+        return 0, fingerprint[0][0], fingerprint[0][1]
 
     """ Return a value corresponding to a fingerprint, this value is used to order fingerprints"""
 
