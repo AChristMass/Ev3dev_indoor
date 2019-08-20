@@ -14,13 +14,17 @@ class Chessboard:
         self.selected_area = None
         self.xpas = 10
         self.ypas = 10
+
+        self.originx = 0
+        self.originy = 0
         for i in range(0, int(self.width/self.xpas)):
             for j in range(0, int(self.height/self.ypas)):
-                self.boxes.append(Box(self.xpas * i, self.ypas * j, self.xpas * i + self.xpas, self.ypas * j + self.ypas, canvas))
+                self.boxes.append(Box(self.xpas * i, self.ypas * j, self.xpas * i + self.xpas, self.ypas * j + self.ypas, canvas, self))
 
     def draw_boxes(self):
         for i in self.boxes:
-            i.draw_box(self.zoom)
+            i.draw_box(self.zoom, self.originx, self.originy)
+
 
     def get_box(self, x, y):
         box_height = (self.height / self.areas) * self.zoom
@@ -34,21 +38,25 @@ class Chessboard:
         return self.boxes[box_number]
 
     def select_box(self, x, y):
+
+        x += self.originx % (self.zoom * self.xpas)
+        y += self.originy % (self.zoom * self.ypas)
         if self.selected_box:
-            self.selected_box.draw_box(self.zoom)
+            self.selected_box.draw_box(self.zoom, self.originx, self.originy)
         if self.selected_area is not None:
-            self.areas_list[self.selected_area].undraw_boxes(self.zoom)
+            self.areas_list[self.selected_area].undraw_boxes(self.zoom, self.originx, self.originy)
 
         nb_cols = int(self.height/self.ypas)
 
-        cols = int(y / self.ypas)
-        rows = int(x / self.xpas)
+        cols = int((y / self.ypas) / self.zoom)
+        rows = int((x / self.xpas) / self.zoom)
+
 
         box_number = int(rows * nb_cols + cols)
 
         box = self.boxes[box_number]
         self.selected_box = box
-        box.draw_box_red(self.zoom)
+        box.draw_box_red(self.zoom, self.originx, self.originy)
 
         area = box.get_area()
 
@@ -69,7 +77,8 @@ class Chessboard:
 
         self.areas_list.append(area)
 
-        area.draw_boxes(self.zoom)
+        area.draw_boxes(self.zoom, self.originx, self.originy)
+
         self.selected_area = area.id
 
     def select_area(self, x, y):
@@ -83,7 +92,9 @@ class Chessboard:
             return
         box.asign_area(self.selected_area)
         self.areas_list[self.selected_area].add_box(box)
-        self.areas_list[self.selected_area].draw_boxes(self.zoom)
+
+        self.areas_list[self.selected_area].draw_boxes(self.zoom, self.originx, self.originy)
+
 
     def remove_box_from_area(self):
         box = self.selected_box
@@ -92,6 +103,8 @@ class Chessboard:
             return
         box.asign_area(None)
         self.areas_list[self.selected_area].remove_box(box)
-        box.draw_box(self.zoom)
+
+        box.draw_box(self.zoom, self.originx, self.originy)
+
         self.areas_list[self.selected_area].draw_boxes(self.zoom)
 
