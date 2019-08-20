@@ -25,15 +25,22 @@ class Chessboard:
         for i in self.boxes:
             i.draw_box(self.zoom, self.originx, self.originy)
 
+    def clear_areas(self):
+        if self.selected_area is not None:
+            self.areas_list[self.selected_area].undraw_boxes(self.zoom)
+            for i in self.areas_list :
+                i.clear_area()
+            self.selected_area = None
+        self.areas_list = list()
+
 
     def get_box(self, x, y):
-        box_height = (self.height / self.areas) * self.zoom
-        box_width = (self.width / self.areas) * self.zoom
+        nb_cols = int(self.height/self.ypas)
 
-        cols = int(y / box_height)
-        rows = int(x / box_width)
+        cols = int((y / self.ypas) / self.zoom)
+        rows = int((x / self.xpas) / self.zoom)
 
-        box_number = rows * self.areas + cols
+        box_number = int(rows * nb_cols + cols)
 
         return self.boxes[box_number]
 
@@ -61,7 +68,7 @@ class Chessboard:
         area = box.get_area()
 
         if area is not None:
-            self.areas_list[area].draw_boxes(self.zoom)
+            self.areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
             self.selected_area = box.get_area()
 
     def create_area(self):
