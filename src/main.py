@@ -4,6 +4,7 @@ from gui.Interface import Interface
 from server.Server import Server
 from server.Database import Database
 
+
 def main():
     host = ''
     port = 12800
@@ -15,9 +16,6 @@ def main():
     t.start()
     print("Launching GUI...")
     inter = Interface(database)
-    inter.create_interface()
-
-
 
 
 if __name__ == '__main__':

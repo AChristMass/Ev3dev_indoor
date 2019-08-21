@@ -21,6 +21,7 @@ class RobotWindow(Toplevel):
         b.pack(padx=1, pady=1, side='right')
         if not self.mother.robotList:
             b.configure(state=DISABLED)
+            u.configure(state=DISABLED)
         self.frame.pack()
 
     def unselect(self):
