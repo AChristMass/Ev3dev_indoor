@@ -52,6 +52,7 @@ class Interface:
         self.screen.bind("<e>", lambda e: self.chessboard.remove_box_from_area())
         self.screen.bind("<h>", lambda e: self.hide_show_chassboard())
         self.screen.bind("<r>", lambda e: self.chessboard.clear_areas())
+        self.screen.bind("<q>", lambda e: self.chessboard.show_hide_area())
 
         self.origin_x = 0
         self.origin_y = 0
@@ -77,10 +78,11 @@ class Interface:
     def hide_show_chassboard(self):
         if self.chessboard_flag is False :
             self.chessboard_flag = True
+            self.chessboard.draw_boxes()
         else :
             self.chessboard_flag = False
+            self.draw_map()
 
-        self.draw_map()
 
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
