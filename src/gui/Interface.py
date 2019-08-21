@@ -1,4 +1,5 @@
 import platform
+import os
 from tkinter import *
 
 from gui.Chessboard import Chessboard
@@ -7,14 +8,12 @@ from gui.Map import Map
 from gui.RobotWindow import RobotWindow
 from server.Server import Server
 
-
 class Interface:
     step = 20
 
     def __init__(self, database):
 
         self.database = database
-
         self.screen = Tk()
         self.width = self.screen.winfo_screenwidth()
         self.height = self.screen.winfo_screenheight()
@@ -24,15 +23,60 @@ class Interface:
         self.screen.attributes('-fullscreen', True)
         self.screen.title("RobotManager")
 
-        self.maps = Frame(self.screen, width=self.width, height=self.height * 10 / 12, borderwidth=0, relief="solid")
-        self.menu = Frame(self.screen, height=self.height * (2 / 12), borderwidth=2, relief="solid")
+        self.maps = Frame(self.screen, width=self.width, height=self.height * 11 / 12, borderwidth=0, relief="solid")
+        self.menu = Frame(self.screen, height=self.height * (1 / 12), borderwidth=2, relief="solid")
 
-        self.left_box = Frame(self.menu, width=self.width * 2 / 3, borderwidth=1, relief="solid")
-        self.right_box = Frame(self.menu, borderwidth=1, relief="solid")
-        self.label_msg = Label(self.left_box, text="Select a Robot")
-        self.label_msg.pack()
+        self.first_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
+        self.second_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
+        self.third_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
+        self.fourth_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
+        self.fifth_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
+        self.label_msg = Label(self.second_box, text="Select a Robot").pack()
         self.canvas = Canvas(self.maps)
+        self.entry_box = Entry(self.fifth_box, width=5)
 
+        self.add = PhotoImage(file='../asset/add.png')
+        self.remove = PhotoImage(file='../asset/remove.png')
+        self.robot = PhotoImage(file='../asset/robot.png')
+        self.eye = PhotoImage(file='../asset/eye.png')
+        self.list = PhotoImage(file='../asset/list.png')
+        self.grid = PhotoImage(file='../asset/grid.png')
+        self.location = PhotoImage(file='../asset/location.png')
+        self.move = PhotoImage(file='../asset/move.png')
+        self.zoomup = PhotoImage(file='../asset/zoomup.png')
+        self.zoomdown = PhotoImage(file='../asset/zoomdown.png')
+        self.radar = PhotoImage(file='../asset/radar.png')
+
+        self.binding()
+
+        self.origin_x = 0
+        self.origin_y = 0
+
+        self.robot_point = None
+        self.position_flag = False
+        self.chessboard_flag = False
+        self.selected_box = None
+        self.zoom = 1
+
+        self.currentRobot = None
+        self.mapMat = self.load_map()
+        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y)
+
+        self.button_current_robot = []
+        self.button_robots = []
+        self.button_fingerprint = []
+        self.button_chessboard = []
+        self.button_tools = []
+        self.robotList = Server.logged
+
+        self.fingerPrintList = self.database.get_fp_list()
+        self.is_finger_print_visible = False
+
+        self.fp_draw_list = []
+        self.create_interface()
+        self.screen.mainloop()
+
+    def binding(self):
         self.screen.bind('<Escape>', lambda e: self.screen.destroy())
         self.screen.bind("<Left>", lambda e: self.__move_left())
         self.screen.bind("<Up>", lambda e: self.__move_up())
@@ -53,26 +97,8 @@ class Interface:
         self.screen.bind("<h>", lambda e: self.hide_show_chassboard())
         self.screen.bind("<r>", lambda e: self.chessboard.clear_areas())
 
-        self.origin_x = 0
-        self.origin_y = 0
-
-        self.robot_point = None
-        self.position_flag = False
-        self.chessboard_flag = False
-        self.selected_box = None
-        self.zoom = 1
-
-        self.currentRobot = None
-        self.mapMat = self.load_map()
-        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y)
-
-        self.button_list = []
-        self.robotList = Server.logged
-
-        self.fingerPrintList = self.database.get_fp_list()
-        self.is_finger_print_visible = False
-
-        self.fp_draw_list = []
+    def nothing(self):
+        return
 
     def hide_show_chassboard(self):
         if self.chessboard_flag is False :
@@ -86,28 +112,91 @@ class Interface:
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
         self.menu.pack(expand=True, fill="both", padx=0, pady=0)
 
-        self.left_box.pack(side="left", expand=True, fill="both", padx=5, pady=5)
-        self.right_box.pack(side="right", expand=True, fill="both", padx=5, pady=5)
+        self.first_box.pack(side="left", expand=True, fill="both")
+        self.second_box.pack(side="left", expand=True, fill="both")
+        self.third_box.pack(side="left", expand=True, fill="both")
+        self.fourth_box.pack(side="left", expand=True, fill="both")
+        self.fifth_box.pack(side="left", expand=True, fill="both")
+
         self.maps.propagate(0)
-        self.left_box.propagate(0)
+        self.first_box.propagate(0)
+        self.second_box.propagate(0)
+        self.third_box.propagate(0)
+        self.fourth_box.propagate(0)
+        self.fifth_box.propagate(0)
 
     def set_up_buttons(self):
-        Button(self.right_box, text='Add Robot', command=self.add_robot, height=2, width=100).pack(padx=1, pady=1)
-        Button(self.right_box, text='Select Robot', command=self.set_robot, height=2, width=100).pack(padx=1, pady=1)
-        self.button_list = [
-            Button(self.left_box, text='FingerPrint List', command=self.show_finger_print, height=10, width=25,
-                   state=ACTIVE),
-            Button(self.left_box, text='Add FingerPrint', command=self.scan_request, height=10, width=25,
-                   state=DISABLED),
-            Button(self.left_box, text='Set Position', command=self.set_position, height=10, width=25,
-                   state=DISABLED),
-            Button(self.left_box, text='Move', command=self.screen.destroy, height=10, width=25, state=DISABLED),
+        Label(self.first_box, text="Robots").pack()
+        Label(self.third_box, text="Fingerprint").pack()
+        Label(self.fourth_box, text="Chessboard").pack()
+        Label(self.fifth_box, text="Tools").pack()
+
+        self.button_robots = [
+            Button(self.first_box, image=self.add, command=self.add_robot),
+            Button(self.first_box, image=self.remove, command=self.screen.destroy),
+            Button(self.first_box, image=self.robot, command=self.set_robot)
         ]
-        for b in self.button_list:
+        for b in self.button_robots:
+            b.pack(side="left", padx=1, pady=1)
+
+        self.button_current_robot = [
+            Button(self.second_box, image=self.location, command=self.set_position, state=DISABLED),
+            Button(self.second_box, image=self.radar, command=self.get_robot_position, state=DISABLED),
+            Button(self.second_box, image=self.move, command=self.nothing, state=DISABLED),
+        ]
+        for b in self.button_current_robot:
             b.pack(padx=1, pady=1, side='left')
 
+        self.button_fingerprint = [
+            Button(self.third_box, image=self.add, command=self.scan_request),
+            Button(self.third_box, image=self.remove, command=self.nothing),
+            Button(self.third_box, image=self.eye, command=self.show_finger_print),
+            Button(self.third_box, image=self.list, command=self.nothing)
+        ]
+        for b in self.button_fingerprint:
+            b.pack(side="left", padx=1, pady=1)
+
+        self.button_chessboard = [
+            Button(self.fourth_box, image=self.add, command=self.nothing),
+            Button(self.fourth_box, image=self.remove, command=self.nothing),
+            Button(self.fourth_box, image=self.grid, command=self.hide_show_chassboard),
+            Button(self.fourth_box, image=self.eye, command=self.nothing)
+        ]
+        for b in self.button_chessboard:
+            b.pack(side="left", padx=1, pady=1)
+
+        self.button_tools = [
+            Button(self.fifth_box, image=self.zoomup, command=self.__zoom_up),
+            Button(self.fifth_box, image=self.zoomdown, command=self.__zoom_down),
+        ]
+        for b in self.button_tools:
+            b.pack(side="left", padx=1, pady=1)
+
+        Label(self.fifth_box, text="   Step ").pack(side='left')
+        self.entry_box.pack(side='left')
+        self.entry_box.delete(0, END)
+        self.entry_box.insert(0, "20")
+        b = Button(self.fifth_box, text="Ok", command=self.change_step)
+        b.pack(side='left')
+        self.button_tools.append(b)
+
+    def get_robot_position(self):
+        if self.currentRobot is None:
+            return
+        self.currentRobot.askScanForPosition()
+
+
+    def change_step(self):
+        n = int(self.entry_box.get())
+        self.screen.focus_force()
+        if 0 < n < 200:
+            Interface.step = n
+        else:
+            self.entry_box.delete(0, END)
+            self.entry_box.insert(0, str(Interface.step))
+
     def add_robot(self):
-        return self
+        return
 
     def scan_request(self):
         if self.currentRobot is None:
@@ -118,7 +207,7 @@ class Interface:
     def show_finger_print(self):
         if self.is_finger_print_visible:
             self.is_finger_print_visible = False
-            self.button_list[0]["borderwidth"] = 1
+            self.button_fingerprint[2]["borderwidth"] = 1
             for i in self.fp_draw_list:
                 self.canvas.delete(i)
         else:
@@ -134,7 +223,7 @@ class Interface:
                                                  * self.zoom, (-self.origin_y / self.zoom + pos[1] + 1) * self.zoom,
                                                  outline="blue",
                                                  fill="blue"))
-            self.button_list[0]["borderwidth"] = 5
+            self.button_fingerprint[2]["borderwidth"] = 5
 
     def __move_right(self):
         self.canvas.move("all", -Interface.step, 0)
@@ -171,7 +260,7 @@ class Interface:
     def __on_click(self):
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
-            if y > self.height * 10 / 12:
+            if y > self.height * 11 / 12:
                 return
             x = int((x + self.origin_x) / self.zoom)
             y = int((y + self.origin_y) / self.zoom)
@@ -185,22 +274,15 @@ class Interface:
             self.button_list[2]["borderwidth"] = 1
             self.draw_map()
             return
-        if self.chessboard_flag is not False :
+        if self.chessboard_flag is not False:
             x, y = self.screen.winfo_pointerxy()
-
-            #Those 2 next calls have to be made in that order
-            #cause the field selected_box of chessboard
-            #is updated in the function "select_box"
             self.chessboard.select_box(x, y)
             self.selected_box = self.chessboard.selected_box
 
-
-
     def create_interface(self):
-        self.set_up_lines()
         self.set_up_buttons()
+        self.set_up_lines()
         self.draw_map()
-        self.screen.mainloop()
 
     def set_robot(self):
         RobotWindow(self, self.screen)
@@ -226,7 +308,7 @@ class Interface:
         self.canvas.delete("all")
 
         largeur = self.width
-        hauteur = int(self.height * (10 / 12))
+        hauteur = int(self.height * (11 / 12))
         self.canvas.create_rectangle(0, 0, self.mapMat.x * self.zoom,
                                      self.mapMat.y * self.zoom, outline="white", fill="white")
         for i in range(self.mapMat.y):
