@@ -1,8 +1,10 @@
 class Area:
-    def __init__(self):
+    def __init__(self, canvas):
         self.boxes = list()
         self.id = None
         self.points = set()
+        self.segment = set()
+        self.canvas = canvas
 
     def clear_area(self):
         for i in self.boxes:
@@ -11,52 +13,55 @@ class Area:
 
     def add_box(self, box):
         self.boxes.append(box)
-        points = list()
+        local_seg = set()
 
-        points.append((box.x1, box.y1))
-        points.append((box.x2, box.y1))
-        points.append((box.x1, box.y2))
-        points.append((box.x2, box.y2))
+        local_seg.add(((box.x1, box.y1), (box.x2, box.y1)))
+        local_seg.add(((box.x2, box.y1), (box.x2, box.y2)))
+        local_seg.add(((box.x2, box.y2), (box.x1, box.y2)))
+        local_seg.add(((box.x1, box.y2), (box.x1, box.y1)))
 
-        pts = None
-        for i in points:
-            if i not in self.points:
-                pts = i
-                break
-        #print("Point : ", pts)
-        #print("Closest to point :", self.find_closest(pts))
+        for seg in local_seg:
+            if seg in self.segment:
+                self.segment.remove(seg)
+            elif (seg[1], seg[0]) in self.segment:
+                self.segment.remove((seg[1], seg[0]))
+            else:
+                self.segment.add(seg)
 
-    def find_closest(self, anchor):
-        distance = 0
-        closest = None
-        for pts in self.points:
-            if pts != anchor:
-                closest = pts
-                distance = valAbs(pts[0] - anchor[0]) + valAbs(pts[1] - anchor[1])
-                print("distance 1", distance)
-                break
 
-        for pts in self.points:
-            dist = valAbs(pts[0] - anchor[0]) + valAbs(pts[1] - anchor[1])
-            if dist < distance:
-                distance = dist
-                print("distance 2", distance)
-                closest = pts
-
-        return closest
+    def draw_area(self, zoom, originx, originy):
+        for seg in self.segment:
+            self.canvas.create_line(seg[0][0] * zoom - originx, seg[0][1] * zoom - originy,
+                                    seg[1][0] * zoom - originx, seg[1][1] * zoom - originy, fill="red2")
 
     def remove_box(self, box):
         self.boxes.remove(box)
-        
+
+        local_seg = set()
+
+        local_seg.add(((box.x1, box.y1), (box.x2, box.y1)))
+        local_seg.add(((box.x2, box.y1), (box.x2, box.y2)))
+        local_seg.add(((box.x2, box.y2), (box.x1, box.y2)))
+        local_seg.add(((box.x1, box.y2), (box.x1, box.y1)))
+
+        for seg in local_seg:
+            if seg in self.segment:
+                self.segment.remove(seg)
+            elif (seg[1], seg[0]) in self.segment:
+                self.segment.remove((seg[1], seg[0]))
+            else :
+                self.segment.add(seg)
+
+
+
     def draw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
             i.draw_box_area(zoom, originx, originy)
+        self.draw_area(zoom, originx, originy)
 
     def undraw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
             i.draw_box(zoom, originx, originy)
-
-    # def find_contour(self, begin):
 
     def valAbs(self, x):
         return -x if x < 0 else x

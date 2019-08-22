@@ -8,3 +8,4 @@
 /src/test/__pycache__/
 
 */*/.pyc
+*.pyc

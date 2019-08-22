@@ -13,31 +13,25 @@ class Box:
         self.canvas = canvas
 
     def draw_box(self, zoom, originx, originy):
-        restex = originx % (zoom * self.chess.xpas)
-        restey = originy % (zoom * self.chess.ypas)
-        self.canvas.create_rectangle(self.x1 * zoom - restex,
-                                     self.y1 * zoom - restey,
-                                     self.x2 * zoom - restex,
-                                     self.y2 * zoom - restey,
-                                     outline="blue", fill="")
+        self.canvas.create_rectangle(self.x1 * zoom - originx,
+                                     self.y1 * zoom - originy,
+                                     self.x2 * zoom - originx,
+                                     self.y2 * zoom - originy,
+                                     outline="LightSkyBlue1", fill="")
 
     def draw_box_red(self, zoom, originx, originy):
-        restex = originx % (zoom * self.chess.xpas)
-        restey = originy % (zoom * self.chess.ypas)
-        self.canvas.create_rectangle(self.x1 * zoom - restex,
-                                     self.y1 * zoom - restey,
-                                     self.x2 * zoom - restex,
-                                     self.y2 * zoom - restey,
+        self.canvas.create_rectangle(self.x1 * zoom - originx,
+                                     self.y1 * zoom - originy,
+                                     self.x2 * zoom - originx,
+                                     self.y2 * zoom - originy,
                                      outline="red", fill="")
 
     def draw_box_area(self, zoom, originx, originy):
-        restex = originx % (zoom * self.chess.xpas)
-        restey = originy % (zoom * self.chess.ypas)
-        self.canvas.create_rectangle(self.x1 * zoom - restex,
-                                     self.y1 * zoom - restey,
-                                     self.x2 * zoom - restex,
-                                     self.y2 * zoom - restey,
-                                     outline="green", fill="")
+        self.canvas.create_rectangle(self.x1 * zoom - originx,
+                                     self.y1 * zoom - originy,
+                                     self.x2 * zoom - originx,
+                                     self.y2 * zoom - originy,
+                                     outline="grey", fill="")
 
     def asign_area(self, area):
         self.area = area
