@@ -1,6 +1,8 @@
 import platform
 import os
 from tkinter import *
+from PIL import Image
+from PIL import ImageTk
 
 from gui.Chessboard import Chessboard
 from gui.Area import Area
@@ -34,18 +36,53 @@ class Interface:
         self.label_msg = Label(self.second_box, text="Select a Robot").pack()
         self.canvas = Canvas(self.maps)
         self.entry_box = Entry(self.fifth_box, width=5)
+        if not platform.system() == 'Darwin' :
+            self.add = PhotoImage(file='../asset/add.png')
+            self.remove = PhotoImage(file='../asset/remove.png')
+            self.robot = PhotoImage(file='../asset/robot.png')
+            self.eye = PhotoImage(file='../asset/eye.png')
+            self.list = PhotoImage(file='../asset/list.png')
+            self.grid = PhotoImage(file='../asset/grid.png')
+            self.location = PhotoImage(file='../asset/location.png')
+            self.move = PhotoImage(file='../asset/move.png')
+            self.zoomup = PhotoImage(file='../asset/zoomup.png')
+            self.zoomdown = PhotoImage(file='../asset/zoomdown.png')
+            self.radar = PhotoImage(file='../asset/radar.png')
+        else :
+            self.add = Image.open('../asset/add.png')
+            self.add = ImageTk.PhotoImage(self.add)
 
-        self.add = PhotoImage(file='../asset/add.png')
-        self.remove = PhotoImage(file='../asset/remove.png')
-        self.robot = PhotoImage(file='../asset/robot.png')
-        self.eye = PhotoImage(file='../asset/eye.png')
-        self.list = PhotoImage(file='../asset/list.png')
-        self.grid = PhotoImage(file='../asset/grid.png')
-        self.location = PhotoImage(file='../asset/location.png')
-        self.move = PhotoImage(file='../asset/move.png')
-        self.zoomup = PhotoImage(file='../asset/zoomup.png')
-        self.zoomdown = PhotoImage(file='../asset/zoomdown.png')
-        self.radar = PhotoImage(file='../asset/radar.png')
+            self.remove = Image.open('../asset/remove.png')
+            self.remove = ImageTk.PhotoImage(self.remove)
+
+            self.robot = Image.open('../asset/robot.png')
+            self.robot = ImageTk.PhotoImage(self.robot)
+
+            self.eye = Image.open('../asset/eye.png')
+            self.eye = ImageTk.PhotoImage(self.eye)
+
+            self.list = Image.open('../asset/list.png')
+            self.list = ImageTk.PhotoImage(self.list)
+
+            self.grid = Image.open('../asset/grid.png')
+            self.grid = ImageTk.PhotoImage(self.grid)
+
+            self.location = Image.open('../asset/location.png')
+            self.location = ImageTk.PhotoImage(self.location)
+
+            self.move = Image.open('../asset/move.png')
+            self.move = ImageTk.PhotoImage(self.move)
+
+            self.zoomup = Image.open('../asset/zoomup.png')
+            self.zoomup = ImageTk.PhotoImage(self.zoomup)
+
+            self.zoomdown = Image.open('../asset/zoomdown.png')
+            self.zoomdown = ImageTk.PhotoImage(self.zoomdown)
+
+            self.radar = Image.open('../asset/radar.png')
+            self.radar = ImageTk.PhotoImage(self.radar)
+
+
 
         self.binding()
 

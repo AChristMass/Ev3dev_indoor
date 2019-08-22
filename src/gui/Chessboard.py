@@ -33,13 +33,14 @@ class Chessboard:
             self.area_flag = True
             for area in self.areas_list:
                 area.draw_area(self.zoom, self.originx, self.originy)
+                area.draw_boxes(self.zoom, self.originx, self.originy)
+
         else:
             self.area_flag = False
             for area in self.areas_list:
                 area.undraw_boxes(self.zoom, self.originx, self.originy)
 
     def clear_areas(self):
-        print("clear area")
         for i in self.areas_list:
             i.clear_area()
             i.undraw_boxes(self.zoom, self.originx, self.originy)
@@ -128,7 +129,5 @@ class Chessboard:
         box.asign_area(None)
 
         self.areas_list[self.selected_area].remove_box(box)
-
         box.draw_box(self.zoom, self.originx, self.originy)
-
         self.areas_list[self.selected_area].draw_boxes(self.zoom, self.originx, self.originy)

@@ -60,7 +60,6 @@ class Area:
         self.draw_area(zoom, originx, originy)
 
     def undraw_boxes(self, zoom, originx, originy):
-        print (self.boxes)
         for i in self.boxes:
             i.draw_box(zoom, originx, originy)
 
