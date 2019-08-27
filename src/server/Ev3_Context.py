@@ -19,6 +19,7 @@ class Ev3Context:
         self.request.register(5, lambda x: self.askDistance_Callback(x[1:]))
         self.x = 629
         self.y = 114
+        self.area = None
         self.macAddress = ""
 
     def doRead(self):

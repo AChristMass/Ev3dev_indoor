@@ -15,6 +15,7 @@ from sklearn import utils
 
 
 def main() :
+    phoneid = 526
     relpos = 525
     space = 524
     bid = 523
@@ -23,7 +24,7 @@ def main() :
     lon = 520
 
 
-    training_file = '../../dataset/TrainingData_b1f1test.csv'
+    training_file = '../../dataset/TrainingData_b1f1.csv'
     validation_file = '../../dataset/ValidationData.csv'
 
     #From server path = "../../bdd/fingerPrint.db"
@@ -47,11 +48,11 @@ def main() :
 
     #Train Test Split
     X = dataset.iloc[:, :-9].values
-    y = dataset.iloc[:, 520].values
+    y = dataset.iloc[:, 525].values
 
 
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
 
 

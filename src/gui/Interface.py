@@ -1,17 +1,17 @@
 import platform
-import os
 from tkinter import *
+
 from PIL import Image
 from PIL import ImageTk
 
 from gui.Chessboard import Chessboard
-from gui.Area import Area
 from gui.Map import Map
 from gui.RobotWindow import RobotWindow
 from server.Server import Server
 
+
 class Interface:
-    step = 20
+    step = 100
 
     def __init__(self, database):
 
@@ -36,7 +36,7 @@ class Interface:
         self.label_msg = Label(self.second_box, text="Select a Robot").pack()
         self.canvas = Canvas(self.maps)
         self.entry_box = Entry(self.fifth_box, width=5)
-        if not platform.system() == 'Darwin' :
+        if not platform.system() == 'Darwin':
             self.add = PhotoImage(file='../asset/add.png')
             self.remove = PhotoImage(file='../asset/remove.png')
             self.robot = PhotoImage(file='../asset/robot.png')
@@ -48,7 +48,7 @@ class Interface:
             self.zoomup = PhotoImage(file='../asset/zoomup.png')
             self.zoomdown = PhotoImage(file='../asset/zoomdown.png')
             self.radar = PhotoImage(file='../asset/radar.png')
-        else :
+        else:
             self.add = Image.open('../asset/add.png')
             self.add = ImageTk.PhotoImage(self.add)
 
@@ -81,8 +81,6 @@ class Interface:
 
             self.radar = Image.open('../asset/radar.png')
             self.radar = ImageTk.PhotoImage(self.radar)
-
-
 
         self.binding()
 
@@ -139,13 +137,12 @@ class Interface:
         return
 
     def hide_show_chassboard(self):
-        if self.chessboard_flag is False :
+        if self.chessboard_flag is False:
             self.chessboard_flag = True
             self.chessboard.draw_boxes()
-        else :
+        else:
             self.chessboard_flag = False
             self.draw_map()
-
 
     def set_up_lines(self):
         self.maps.pack(expand=False, fill="both", padx=0, pady=0)
@@ -223,7 +220,6 @@ class Interface:
         if self.currentRobot is None:
             return
         self.currentRobot.askScanForPosition()
-
 
     def change_step(self):
         n = int(self.entry_box.get())
@@ -310,6 +306,7 @@ class Interface:
             self.position_flag = False
             self.currentRobot.x = x
             self.currentRobot.y = y
+            self.currentRobot.area = self.chessboard.get_box(x,y).area
             self.button_list[2]["borderwidth"] = 1
             self.draw_map()
             return
@@ -379,6 +376,6 @@ class Interface:
                 self.fp_draw_list.append(
                     self.canvas.create_rectangle(pos[0] * self.zoom, pos[1] * self.zoom, (pos[0] + 1)
                                                  * self.zoom, (pos[1] + 1) * self.zoom, outline="blue", fill="blue"))
-        if self.chessboard_flag is not False :
+        if self.chessboard_flag is not False:
             self.chessboard.draw_boxes()
         self.canvas.pack(fill=BOTH, expand=True)

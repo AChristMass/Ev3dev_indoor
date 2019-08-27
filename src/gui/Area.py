@@ -28,7 +28,6 @@ class Area:
             else:
                 self.segment.add(seg)
 
-
     def draw_area(self, zoom, originx, originy):
         for seg in self.segment:
             self.canvas.create_line(seg[0][0] * zoom - originx, seg[0][1] * zoom - originy,
@@ -49,10 +48,8 @@ class Area:
                 self.segment.remove(seg)
             elif (seg[1], seg[0]) in self.segment:
                 self.segment.remove((seg[1], seg[0]))
-            else :
+            else:
                 self.segment.add(seg)
-
-
 
     def draw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
