@@ -1,7 +1,6 @@
 class Box:
-  
-    def __init__(self, x1, y1, x2, y2, canvas, chess):
 
+    def __init__(self, x1, y1, x2, y2, canvas, chess):
         self.area = None
         self.x1 = int(x1)
         self.y1 = int(y1)
