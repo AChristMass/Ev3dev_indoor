@@ -5,7 +5,7 @@ from gui.Box import Box
 class Chessboard:
     area_id = 0
 
-    def __init__(self, canvas, zoom, width, height, database):
+    def __init__(self, canvas, zoom, width, height, database, interface):
         self.width = width
         self.height = height
         self.canvas = canvas
@@ -19,6 +19,7 @@ class Chessboard:
         self.selected_box = None
         self.selected_area = None
         self.area_flag = False
+        self.interface = interface
 
         self.originx = 0
         self.originy = 0
@@ -42,6 +43,9 @@ class Chessboard:
 
         else:
             self.area_flag = False
+            if not self.interface.chessboard_flag:
+                self.interface.draw_map()
+                return
             for area in self.areas_list:
                 self.areas_list[area].undraw_boxes(self.zoom, self.originx, self.originy)
 
@@ -82,6 +86,7 @@ class Chessboard:
 
         cols = int((oy / self.ypas) / self.zoom)
         rows = int((ox / self.xpas) / self.zoom)
+        print("case : ", rows, cols)
         box_number = int(rows * nb_cols + cols)
 
         box = self.boxes[box_number]
@@ -148,8 +153,9 @@ class Chessboard:
         self.database.delete_area_from_case(coord_x, coord_y)
 
     def get_box_coord(self):
-        rows = int((self.selected_box.x1 / self.xpas) / self.zoom)
-        cols = int((self.selected_box.y1 / self.ypas) / self.zoom)
+        rows = int(self.selected_box.x1/self.xpas)
+        cols = int(self.selected_box.y1/self.ypas)
+        print("avant insert : ", rows, cols, "x1 et y1 : ", self.selected_box.x1, self.selected_box.y1)
         return rows, cols
 
     def load_id_on_connect(self):
@@ -167,9 +173,9 @@ class Chessboard:
             nb_cols = int(self.height / self.ypas)
             print("numb : ", i[0], i[1], i[0] * nb_cols + i[1])
             box = self.boxes[i[0] * nb_cols + i[1]]
-            if int(i[2]) != -1:
-                box.asign_area(int(i[2]))
-                self.areas_list[int(i[2])].add_box(box)
+            if i[2] != -1:
+                box.asign_area(i[2])
+                self.areas_list[i[2]].add_box(box)
 
     def load_area_list(self):
         lst = self.database.load_areas()

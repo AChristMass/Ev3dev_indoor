@@ -74,7 +74,7 @@ class Interface:
 
         self.currentRobot = None
         self.mapMat = self.load_map()
-        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database)
+        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database, self)
 
         self.button_current_robot = []
         self.button_robots = []
