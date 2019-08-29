@@ -50,38 +50,17 @@ class Interface:
             self.zoomdown = PhotoImage(file='../asset/zoomdown.png')
             self.radar = PhotoImage(file='../asset/radar.png')
         else:
-            self.add = Image.open('../asset/add.png')
-            self.add = ImageTk.PhotoImage(self.add)
-
-            self.remove = Image.open('../asset/remove.png')
-            self.remove = ImageTk.PhotoImage(self.remove)
-
-            self.robot = Image.open('../asset/robot.png')
-            self.robot = ImageTk.PhotoImage(self.robot)
-
-            self.eye = Image.open('../asset/eye.png')
-            self.eye = ImageTk.PhotoImage(self.eye)
-
-            self.list = Image.open('../asset/list.png')
-            self.list = ImageTk.PhotoImage(self.list)
-
-            self.grid = Image.open('../asset/grid.png')
-            self.grid = ImageTk.PhotoImage(self.grid)
-
-            self.location = Image.open('../asset/location.png')
-            self.location = ImageTk.PhotoImage(self.location)
-
-            self.move = Image.open('../asset/move.png')
-            self.move = ImageTk.PhotoImage(self.move)
-
-            self.zoomup = Image.open('../asset/zoomup.png')
-            self.zoomup = ImageTk.PhotoImage(self.zoomup)
-
-            self.zoomdown = Image.open('../asset/zoomdown.png')
-            self.zoomdown = ImageTk.PhotoImage(self.zoomdown)
-
-            self.radar = Image.open('../asset/radar.png')
-            self.radar = ImageTk.PhotoImage(self.radar)
+            self.add = ImageTk.PhotoImage(Image.open('../asset/add.png'))
+            self.remove = ImageTk.PhotoImage(Image.open('../asset/remove.png'))
+            self.robot = ImageTk.PhotoImage(Image.open('../asset/robot.png'))
+            self.eye = ImageTk.PhotoImage(Image.open('../asset/eye.png'))
+            self.list = ImageTk.PhotoImage(Image.open('../asset/list.png'))
+            self.grid = ImageTk.PhotoImage(Image.open('../asset/grid.png'))
+            self.location = ImageTk.PhotoImage(Image.open('../asset/location.png'))
+            self.move = ImageTk.PhotoImage(Image.open('../asset/move.png'))
+            self.zoomup = ImageTk.PhotoImage(Image.open('../asset/zoomup.png'))
+            self.zoomdown = ImageTk.PhotoImage(Image.open('../asset/zoomdown.png'))
+            self.radar = ImageTk.PhotoImage(Image.open('../asset/radar.png'))
 
         self.binding()
 
@@ -153,6 +132,7 @@ class Interface:
         self.currentRobot.askScanForPosition()
 
     def hide_show_chassboard(self):
+        self.database.show_cases()
         if self.chessboard_flag is False:
             self.chessboard_flag = True
             self.chessboard.draw_boxes()
@@ -212,7 +192,7 @@ class Interface:
             Button(self.fourth_box, image=self.add, command=self.nothing),
             Button(self.fourth_box, image=self.remove, command=self.nothing),
             Button(self.fourth_box, image=self.grid, command=self.hide_show_chassboard),
-            Button(self.fourth_box, image=self.eye, command=self.nothing)
+            Button(self.fourth_box, image=self.eye, command=self.chessboard.show_hide_area)
         ]
         for b in self.button_chessboard:
             b.pack(side="left", padx=1, pady=1)

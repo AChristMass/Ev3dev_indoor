@@ -10,9 +10,9 @@ class Database:
             print("Initialising Database...")
             # self.cmd.execute("create table signals (x integer, y integer,
             # bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
-            self.cmd.execute("CREATE TABLE CASES (x interger, y integer, area integer default 0)")
             self.cmd.execute(
                 "create table FG (x interger, y interger, xc integer, yx integer ,PRIMARY KEY(xc, yc))")
+            self.cmd.execute("create table cases (x integer, y integer, area integer default -1, PRIMARY KEY(x, y))")
         else:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
@@ -49,10 +49,6 @@ class Database:
             self.cmd.execute(
                 'insert into signals(x, y, bssid, signal, type) Values (' + str(x) + ', ' + str(y) + ',"' + str(
                     bssid) + '", ' + str(signal) + ', ' + str(way) + ')')
-
-            print("db add : ",
-                  '(' + str(x) + ', ' + str(y) + ',"' + str(bssid) + '", ' + str(signal) + ', ' + str(way) + ')')
-            self.bdd.commit()
         except:
             print("Triplet X:" + str(x) + " Y:" + str(y) + " BSSID:" + bssid + " already exist.")
 
@@ -168,3 +164,54 @@ class Database:
                 fingerprints[len(fingerprints) - 1].append(scans[i])
 
         return fingerprints
+
+    def add_new_box(self, x, y, area):
+        try:
+            self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+            self.cmd = self.bdd.cursor()
+            self.cmd.execute('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',"' + str(
+                    area) + '")')
+            print('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',"' + str(
+                    area) + '")')
+            self.bdd.commit()
+        except:
+            print("Already exist")
+
+    def show_cases(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('select * from cases')
+        print("____________")
+        for i in self.cmd:
+            print(i)
+        print("__________")
+
+    def load_id_area(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('select max(area) from cases')
+        id = 0
+        for i in self.cmd:
+            id = i
+        return id[0]
+
+    def delete_area_from_case(self, x, y):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('update cases set area = -1 where x =' + str(x) + ' and ' + str(y))
+        self.bdd.commit()
+
+    def load_cases(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('select x, y, area from cases')
+        return self.cmd
+
+    def load_areas(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute('select distinct area from cases')
+        lst = []
+        for i in self.cmd:
+            lst.append(i[0])
+        return lst
