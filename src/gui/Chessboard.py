@@ -37,24 +37,24 @@ class Chessboard:
         if self.area_flag is False:
             self.area_flag = True
             for area in self.areas_list:
-                areas_list[area].draw_area(self.zoom, self.originx, self.originy)
-                areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
+                self.areas_list[area].draw_area(self.zoom, self.originx, self.originy)
+                self.areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
 
         else:
             self.area_flag = False
             for area in self.areas_list:
-                areas_list[area].undraw_boxes(self.zoom, self.originx, self.originy)
+                self.areas_list[area].undraw_boxes(self.zoom, self.originx, self.originy)
 
     def clear_areas(self):
         for area in self.areas_list:
-            areas_list[area].clear_area()
-            areas_list[area].undraw_boxes(self.zoom, self.originx, self.originy)
+            self.areas_list[area].clear_area()
+            self.areas_list[area].undraw_boxes(self.zoom, self.originx, self.originy)
         self.selected_area = None
         self.areas_list = {}
 
     def draw_all_area(self):
         for area in self.areas_list:
-            areas_list[area].draw_area(self.zoom, self.originx, self.originy)
+            self.areas_list[area].draw_area(self.zoom, self.originx, self.originy)
 
     def get_box(self, x, y):
         nb_cols = int(self.height / self.ypas)
