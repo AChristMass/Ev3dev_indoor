@@ -169,10 +169,10 @@ class Database:
         try:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
-            self.cmd.execute('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',"' + str(
-                    area) + '")')
-            print('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',"' + str(
-                    area) + '")')
+            self.cmd.execute('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',' + str(
+                    area) + ')')
+            print('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',' + str(
+                    area) + ')')
             self.bdd.commit()
         except:
             print("Already exist")
