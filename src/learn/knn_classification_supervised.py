@@ -3,6 +3,7 @@ import os.path
 import numpy as np
 import pandas as pd
 from sklearn import neighbors
+from joblib import dump, load
 
 
 def main():
@@ -72,6 +73,9 @@ def main():
 
     print("Tested on", len(X2), "fingerprints")
 
+
+    #nbrs = load('Knn_Class.joblib')
+
     nbrs = neighbors.KNeighborsClassifier(n_neighbors=5)
     nbrs.fit(X, y)
 
@@ -85,6 +89,7 @@ def main():
     print("Accuracy = ", a / len(X2) * 100)
 
     # print(value_to_predict.shape)
+    dump(nbrs, 'Knn_Class.joblib')
 
     # print(prediction)
 

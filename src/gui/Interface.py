@@ -7,6 +7,7 @@ from PIL import ImageTk
 from gui.Chessboard import Chessboard
 from gui.Map import Map
 from gui.RobotWindow import RobotWindow
+from learn.Finder import Finder
 from server.Server import Server
 
 
@@ -95,7 +96,8 @@ class Interface:
 
         self.currentRobot = None
         self.mapMat = self.load_map()
-        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y)
+        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database)
+        self.finder = Finder()
 
         self.button_current_robot = []
         self.button_robots = []
@@ -123,7 +125,7 @@ class Interface:
         self.screen.bind("<1>", lambda e: self.__on_click())
         self.screen.bind("<4>", lambda e: self.__move_up())
         self.screen.bind("<5>", lambda e: self.__move_down())
-        self.screen.bind("<t>", lambda e: self.currentRobot.askScanForPosition())
+        self.screen.bind("<t>", lambda e: self.askScanForPosition())
         self.screen.bind("<y>", lambda e: self.currentRobot.showScans())
         self.screen.bind("<d>", lambda e: self.currentRobot.askDistance())
         self.screen.bind("<a>", lambda e: self.chessboard.create_area())
@@ -132,9 +134,23 @@ class Interface:
         self.screen.bind("<h>", lambda e: self.hide_show_chassboard())
         self.screen.bind("<r>", lambda e: self.chessboard.clear_areas())
         self.screen.bind("<q>", lambda e: self.chessboard.show_hide_area())
+        self.screen.bind("<s>", lambda e: self.train_finder())
+        self.screen.bind("<d>", lambda e: self.draw_specified_area())
+
+    def draw_specified_area(self):
+        if self.finder.prediction is not None:
+            self.chessboard.draw_specified_area(self.finder.prediction)
+
+    def train_finder(self):
+        self.finder.train(self.database.get_fp_for_training())
 
     def nothing(self):
         return
+
+    def askScanForPosition(self):
+        if self.currentRobot is None:
+            return
+        self.currentRobot.askScanForPosition()
 
     def hide_show_chassboard(self):
         if self.chessboard_flag is False:
@@ -211,7 +227,7 @@ class Interface:
         Label(self.fifth_box, text="   Step ").pack(side='left')
         self.entry_box.pack(side='left')
         self.entry_box.delete(0, END)
-        self.entry_box.insert(0, "20")
+        self.entry_box.insert(0, str(Interface.step))
         b = Button(self.fifth_box, text="Ok", command=self.change_step)
         b.pack(side='left')
         self.button_tools.append(b)
@@ -306,7 +322,10 @@ class Interface:
             self.position_flag = False
             self.currentRobot.x = x
             self.currentRobot.y = y
-            self.currentRobot.area = self.chessboard.get_box(x,y).area
+            box_coords = self.chessboard.get_box_coord()
+            self.currentRobot.xc = box_coords[0]
+            self.currentRobot.y = box_coords[1]
+            self.currentRobot.area = self.chessboard.get_box(x, y).area
             self.button_list[2]["borderwidth"] = 1
             self.draw_map()
             return

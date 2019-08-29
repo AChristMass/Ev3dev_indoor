@@ -8,10 +8,11 @@ class Database:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
             print("Initialising Database...")
+            # self.cmd.execute("create table signals (x integer, y integer,
+            # bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
+            self.cmd.execute("CREATE TABLE CASES (x interger, y integer, area integer default 0)")
             self.cmd.execute(
-                "create table signals (x integer, y integer, bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
-            self.cmd.execute("CREATE TABLE data (zone integer default 0)")
-            self.cmd.execute("create table fingerprints (x interger, y interger, PRIMARY KEY(x, y))")
+                "create table FG (x interger, y interger, xc integer, yx integer ,PRIMARY KEY(xc, yc))")
         else:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
@@ -21,7 +22,7 @@ class Database:
         self.excludedAPs = set()
         self.excludedAPs.add("OnePlus")
 
-    def scanFringerprint(self, lines, context):
+    def scan_fringerprint(self, lines, context):
         lines = lines.split("\n")
         address = list()
         signals = list()
@@ -67,30 +68,59 @@ class Database:
             address.append(lines[i].split(" ")[1])
             signals.append(int(float(lines[i + 1].split(" ")[1])))
 
-        self.add_fingerprint_with_area(context.area, address, signals)
+        self.add_fingerprint_with_area(context, address, signals)
 
-    def add_fingerprint_with_area(self, area, bssids, signals):
-
+    def add_fingerprint_with_area(self, context, bssids, signals):
+        print("add_fingerprint_with_area")
         try:
-            # The next 2 lines are here because you have to reconnect the bdd,
+            # The next 3 lines are here because you have to reconnect the bdd,
             # otherwize you'll get a "SqLite object created in an other Thread error,
             # that's a known error with sqlite3 "
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
 
-            for bssid in bssids :
-                if bssid not in self.knownAPs :
-                    self.knownAPs.append(bssid)
-                    self.cmd.execute('ALTER TABLE data ADD column' + str(bssid) + 'integer DEFAULT 0')
+            area = context.area
+            x = context.x
+            y = context.y
+            xc = context.xc
+            yc = context.yc
 
+            for bssid in bssids:
+                if bssid not in self.knownAPs:
+                    self.knownAPs.append(bssid)
+                    self.cmd.execute('ALTER TABLE fingerprints ADD column' + str(bssid) + 'integer DEFAULT 0')
 
             self.cmd.execute(
-                'insert into data('+",".join(bssids)+') Values ('+",".join(signals) +')')
+                'INSERT INTO FG(x, y, xc, xy' + ",".join(bssids) + ' ) VALUES (' + str(x) + ',' + str(y) + ',' + str(
+                    xc) + ',' + str(yc) + ",".join(signals) + ')')
+            self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(area) + ')')
+
+
+            print("select * from CASESs")
+            self.cmd.execute('SELECT * FROM CASES')
+            for i in self.cmd:
+                print(i)
+
+            print("select * from ")
+            self.cmd.execute('SELECT * FROM  FG')
+            for i in self.cmd:
+                print(i)
 
             print("db add : " + ",".join(bssids))
             self.bdd.commit()
         except:
             print("Fingerprint already existing.")
+
+    def get_fp_for_training(self):
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        self.cmd.execute(
+            'SELECT' + ",".join(self.knownAPs) + ', area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
+
+        data = list()
+        for i in self.cmd:
+            data.append(i)
+        return data
 
     def printTable(self):
         print("Print table")

@@ -11,6 +11,7 @@ class Box:
 
         self.canvas = canvas
 
+
     def draw_box(self, zoom, originx, originy):
         self.canvas.create_rectangle(self.x1 * zoom - originx,
                                      self.y1 * zoom - originy,

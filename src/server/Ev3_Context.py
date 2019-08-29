@@ -14,13 +14,17 @@ class Ev3Context:
         self.pending = ""  # Use to store data from an incompleted frame (Like a from who would take two calls to SOCKET.recv() to be completed)
         self.request.register(1, lambda x: self.registerMacAdress(x[3:]))
         self.request.register(2, lambda x: print(x[1:]))
-        self.request.register(3, lambda x: self.server.database.scanFringerprint(x[1:], self))
+        self.request.register(3, lambda x: self.server.database.scan_fringerprint_with_area(x[1:], self))
         self.request.register(4, lambda x: self.askScanForPosition_Callback(x[1:]))
         self.request.register(5, lambda x: self.askDistance_Callback(x[1:]))
         self.x = 629
         self.y = 114
+        self.xc = None
+        self.yc = None
         self.area = None
         self.macAddress = ""
+
+
 
     def doRead(self):
         recv = self.client.recv(1024)
@@ -88,7 +92,7 @@ class Ev3Context:
 
     """Callback functions for "askScanForPosition" """
 
-    def askScanForPosition_Callback(self, scan):
+    def askScanForPosition_Callback2(self, scan):
         N = 7  # number of fingerprint used
         current_fingerprint = list()  # One scan from current_fingerprint =  ('70:28:8b:d4:53:49', -71)
         scan = scan.split("\n")
@@ -123,6 +127,11 @@ class Ev3Context:
         self.y = pos[1]
 
     """return the estimated position according to a set of positions"""
+
+    def askScanForPosition_Callback(self, scan):
+        print("askScanForPosition_Callback")
+        print(scan)
+        return
 
     def relative_position(self, positions):
         # One position --> (0.015215327576699661, 629, 114) -> Coef | x | y

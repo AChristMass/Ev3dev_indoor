@@ -3,7 +3,8 @@ from gui.Box import Box
 
 
 class Chessboard:
-    def __init__(self, canvas, zoom, width, height):
+    def __init__(self, canvas, zoom, width, height, database):
+        self.database = database
         self.width = width
         self.height = height
         self.boxes = list()
@@ -23,6 +24,22 @@ class Chessboard:
                 self.boxes.append(
                     Box(self.xpas * i, self.ypas * j, self.xpas * i + self.xpas, self.ypas * j + self.ypas, canvas,
                         self))
+
+    def get_box_coord(self):
+        x = self.selected_box.x1
+        y = self.selected_box.y1
+
+        cols = int((y / self.ypas) / self.zoom)
+        rows = int((x / self.xpas) / self.zoom)
+
+        return rows, cols
+
+    def draw_specified_area(self, id):
+        temp = None
+        for area in self.areas_list:
+            if area.id == id:
+                temp = area
+        temp.draw_specific_area(self.zoom, self.originx, self.originy)
 
     def draw_boxes(self):
         for i in self.boxes:
@@ -85,7 +102,6 @@ class Chessboard:
 
         area = box.get_area()
 
-
         if area is not None:
             self.areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
             self.selected_area = box.get_area()
@@ -94,6 +110,9 @@ class Chessboard:
         area = Area(self.canvas)
 
         box = self.selected_box
+        if box is None:
+            return
+
         if box.get_area() is not None:
             return
 
@@ -113,6 +132,8 @@ class Chessboard:
 
     def add_box_to_area(self):
         box = self.selected_box
+        if self.selected_area is None:
+            return
 
         if box.get_area() is not None:
             return
