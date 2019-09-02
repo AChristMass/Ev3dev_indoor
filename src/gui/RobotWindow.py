@@ -29,16 +29,17 @@ class RobotWindow(Toplevel):
         self.mother.currentRobot = None
         self.mother.canvas.delete("all")
         self.mother.draw_map()
-        for b in self.mother.button_list:
+        for b in self.mother.button_current_robot:
             b.configure(state=DISABLED)
         self.destroy()
 
     def print_robot(self):
-        self.mother.zoom = 3
         ind = self.box.curselection()[0]
         self.mother.currentRobot = self.mother.robotList[ind]
+        self.mother.currentRobot.xc, self.mother.currentRobot.yc = self.mother.chessboard.get_box_coord_with_coord(self.mother.currentRobot.x,
+                                                                                            self.mother.currentRobot.y)
         self.mother.label_msg.config(text=self.mother.currentRobot.name)
-        for b in self.mother.button_list:
+        for b in self.mother.button_current_robot:
             b.configure(state=ACTIVE)
         self.mother.canvas.delete("all")
         self.mother.draw_map()

@@ -11,7 +11,7 @@ class Database:
             # self.cmd.execute("create table signals (x integer, y integer,
             # bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
             self.cmd.execute(
-                "create table FG (x interger, y interger, xc integer, yx integer ,PRIMARY KEY(xc, yc))")
+                "create table FG (x integer, y integer, xc integer, yc integer ,PRIMARY KEY(xc, yc))")
             self.cmd.execute("create table cases (x integer, y integer, area integer default -1, PRIMARY KEY(x, y))")
         else:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
@@ -21,6 +21,11 @@ class Database:
         self.knownAPs = list()
         self.excludedAPs = set()
         self.excludedAPs.add("OnePlus")
+
+        self.cmd.execute("PRAGMA table_info(FG)")
+        self.cursors = [e for e in self.cmd]
+        for i in self.cursors[4:]:
+            self.knownAPs.append(i[1])
 
     def scan_fringerprint(self, lines, context):
         lines = lines.split("\n")
@@ -68,54 +73,92 @@ class Database:
 
     def add_fingerprint_with_area(self, context, bssids, signals):
         print("add_fingerprint_with_area")
-        try:
-            # The next 3 lines are here because you have to reconnect the bdd,
-            # otherwize you'll get a "SqLite object created in an other Thread error,
-            # that's a known error with sqlite3 "
-            self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
-            self.cmd = self.bdd.cursor()
 
-            area = context.area
-            x = context.x
-            y = context.y
-            xc = context.xc
-            yc = context.yc
-
-            for bssid in bssids:
-                if bssid not in self.knownAPs:
-                    self.knownAPs.append(bssid)
-                    self.cmd.execute('ALTER TABLE fingerprints ADD column' + str(bssid) + 'integer DEFAULT 0')
-
-            self.cmd.execute(
-                'INSERT INTO FG(x, y, xc, xy' + ",".join(bssids) + ' ) VALUES (' + str(x) + ',' + str(y) + ',' + str(
-                    xc) + ',' + str(yc) + ",".join(signals) + ')')
-            self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(area) + ')')
-
-
-            print("select * from CASESs")
-            self.cmd.execute('SELECT * FROM CASES')
-            for i in self.cmd:
-                print(i)
-
-            print("select * from ")
-            self.cmd.execute('SELECT * FROM  FG')
-            for i in self.cmd:
-                print(i)
-
-            print("db add : " + ",".join(bssids))
-            self.bdd.commit()
-        except:
-            print("Fingerprint already existing.")
-
-    def get_fp_for_training(self):
+        # The next 3 lines are here because you have to reconnect the bdd,
+        # otherwize you'll get a "SqLite object created in an other Thread error,
+        # that's a known error with sqlite3 "
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
-        self.cmd.execute(
-            'SELECT' + ",".join(self.knownAPs) + ', area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
 
+        area = context.area
+        x = context.x
+        y = context.y
+        xc = context.xc
+        yc = context.yc
+
+        for bssid in bssids:
+            if bssid not in self.knownAPs:
+                self.knownAPs.append(bssid)
+                self.cmd.execute('ALTER TABLE FG ADD column' + '\'' + str(bssid) + '\'' + 'integer DEFAULT 0')
+
+        self.cmd.execute("PRAGMA table_info(FG)")
+        self.cursors = [e for e in self.cmd]
+
+        self.cmd.execute(
+            'INSERT INTO FG(x, y, xc, yc,\'' + "','".join(bssids) + '\' ) VALUES (' + str(x) + ',' + str(
+                y) + ',' + str(
+                xc) + ',' + str(yc) + "," + ", ".join(str(signal) for signal in signals) + ')')
+
+        """if area is not None:
+            self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(area) + ')')
+        else:
+            self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(-1) + ')')"""
+
+        print("select * from CASES")
+        self.cmd.execute('SELECT * FROM CASES')
+        for i in self.cmd:
+            print(i)
+
+        print("select * from ")
+        self.cmd.execute('SELECT * FROM  FG')
+        for i in self.cmd:
+            print(i)
+
+        print("db add : " + ",".join(bssids))
+        self.bdd.commit()
+        return
+
+    def get_fp_for_training(self):
+        print("___________get_fp_for_training___________")
+        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
+        self.cmd = self.bdd.cursor()
+        print("select * from CASES")
+
+        self.cmd.execute('SELECT * FROM CASES')
+        for i in self.cmd:
+            print(i)
+
+        print("select * from FG")
+        self.cmd.execute('SELECT * FROM  FG')
+        for i in self.cmd:
+            print(i)
+
+        print('SELECT ' + ", ".join(
+            map(str, self.knownAPs)) + ' ,area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
+
+        print("_________TABLE_NAME_________")
+        self.cmd.execute("PRAGMA table_info(FG)")
+        self.cursors = [e for e in self.cmd]
+        for i in self.cursors[4:]:
+            print(i[1])
+
+        print("_________TABLE_NAME_________")
+
+        self.cmd.execute(
+            'SELECT ' + ', '.join(
+                map(str, self.knownAPs)) + ' ,area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
+
+        """self.cmd.execute(
+            'SELECT * FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')"""
+
+        print("_____________SQL CALL DONE______________")
         data = list()
         for i in self.cmd:
+            print("____________")
+            print(i)
+            print("____________")
             data.append(i)
+        print("___________get_fp_for_training___________")
         return data
 
     def printTable(self):
@@ -131,7 +174,7 @@ class Database:
         scans = list()
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
-        self.cmd.execute('select * from signals ORDER BY x, y')
+        self.cmd.execute('select * from FG ORDER BY x, y')
         for i in self.cmd:
             scans.append(i[:-1])
         return scans
@@ -139,7 +182,7 @@ class Database:
     def get_fp_list(self):
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
-        self.cmd.execute('select DISTINCT x, y from signals')
+        self.cmd.execute('select DISTINCT x, y from FG')
         lst = []
         for i in self.cmd:
             lst.append(i)
@@ -170,9 +213,9 @@ class Database:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
             self.cmd.execute('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',' + str(
-                    area) + ')')
+                area) + ')')
             print('insert into cases(x, y, area) Values (' + str(x) + ', ' + str(y) + ',' + str(
-                    area) + ')')
+                area) + ')')
             self.bdd.commit()
         except:
             print("Already exist")
@@ -215,3 +258,7 @@ class Database:
         for i in self.cmd:
             lst.append(i[0])
         return lst
+
+    def format_scan_for_prediction(self, bssids, signals):
+
+        return

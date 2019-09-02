@@ -34,7 +34,8 @@ class Interface:
         self.third_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
         self.fourth_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
         self.fifth_box = Frame(self.menu, width=self.width * 1 / 5, borderwidth=1, relief="solid")
-        self.label_msg = Label(self.second_box, text="Select a Robot").pack()
+        self.label_msg = Label(self.second_box, text="Select a Robot")
+        self.label_msg.pack()
         self.canvas = Canvas(self.maps)
         self.entry_box = Entry(self.fifth_box, width=5)
         if not platform.system() == 'Darwin':
@@ -75,7 +76,7 @@ class Interface:
 
         self.currentRobot = None
         self.mapMat = self.load_map()
-        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database)
+        self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database, self)
         self.finder = Finder()
 
         self.button_current_robot = []
@@ -233,6 +234,10 @@ class Interface:
         if self.currentRobot is None:
             return
         self.fingerPrintList.append((self.currentRobot.x, self.currentRobot.y))
+        box_coords = self.chessboard.get_box_coord_with_coord(self.currentRobot.x, self.currentRobot.y)
+        self.currentRobot.xc = box_coords[0]
+        self.currentRobot.yc = box_coords[1]
+
         self.currentRobot.askScan()
 
     def show_finger_print(self):
@@ -302,11 +307,18 @@ class Interface:
             self.position_flag = False
             self.currentRobot.x = x
             self.currentRobot.y = y
-            box_coords = self.chessboard.get_box_coord()
-            self.currentRobot.xc = box_coords[0]
-            self.currentRobot.y = box_coords[1]
-            self.currentRobot.area = self.chessboard.get_box(x, y).area
-            self.button_list[2]["borderwidth"] = 1
+
+            if self.chessboard.selected_box is not None:
+                box_coords = self.chessboard.get_box_coord()
+                self.currentRobot.xc = box_coords[0]
+                self.currentRobot.yc = box_coords[1]
+                self.currentRobot.area = self.chessboard.get_box(x, y).area
+            else:
+                box_coords = self.chessboard.get_box_coord_with_coord(x, y)
+                self.currentRobot.xc = box_coords[0]
+                self.currentRobot.yc = box_coords[1]
+
+            self.button_current_robot[0]["borderwidth"] = 1
             self.draw_map()
             return
         if self.chessboard_flag is not False:
@@ -330,10 +342,10 @@ class Interface:
     def set_position(self):
         if self.position_flag:
             self.position_flag = False
-            self.button_list[2]["borderwidth"] = 1
+            self.button_current_robot[0]["borderwidth"] = 1
         else:
             self.position_flag = True
-            self.button_list[2]["borderwidth"] = 5
+            self.button_current_robot[0]["borderwidth"] = 2
 
     def draw_map(self):
         self.origin_y = 0
@@ -370,6 +382,8 @@ class Interface:
                              -self.currentRobot.y * self.zoom + hauteur / 2)
             self.origin_x -= -self.currentRobot.x * self.zoom + largeur / 2
             self.origin_y -= -self.currentRobot.y * self.zoom + hauteur / 2
+            self.chessboard.originx = self.origin_x
+            self.chessboard.originy = self.origin_y
         if self.fp_draw_list:
             for pos in self.fingerPrintList:
                 self.fp_draw_list.append(

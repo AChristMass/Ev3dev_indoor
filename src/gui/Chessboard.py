@@ -30,15 +30,6 @@ class Chessboard:
                         self))
         self.load_cases_list()
 
-    def get_box_coord(self):
-        x = self.selected_box.x1
-        y = self.selected_box.y1
-
-        cols = int((y / self.ypas) / self.zoom)
-        rows = int((x / self.xpas) / self.zoom)
-
-        return rows, cols
-
     def draw_specified_area(self, id):
         temp = None
         for area in self.areas_list:
@@ -102,7 +93,6 @@ class Chessboard:
 
         cols = int((oy / self.ypas) / self.zoom)
         rows = int((ox / self.xpas) / self.zoom)
-        print("case : ", rows, cols)
         box_number = int(rows * nb_cols + cols)
 
         box = self.boxes[box_number]
@@ -170,7 +160,11 @@ class Chessboard:
     def get_box_coord(self):
         rows = int(self.selected_box.x1/self.xpas)
         cols = int(self.selected_box.y1/self.ypas)
-        print("avant insert : ", rows, cols, "x1 et y1 : ", self.selected_box.x1, self.selected_box.y1)
+        return rows, cols
+
+    def get_box_coord_with_coord(self,x,y):
+        rows = int(x/self.xpas)
+        cols = int(y/self.ypas)
         return rows, cols
 
     def load_id_on_connect(self):
@@ -183,10 +177,7 @@ class Chessboard:
     def load_cases_list(self):
         cmd = self.database.load_cases()
         for i in cmd:
-            x1 = i[0] * self.zoom * self.xpas
-            y1 = i[1] * self.zoom * self.ypas
             nb_cols = int(self.height / self.ypas)
-            print("numb : ", i[0], i[1], i[0] * nb_cols + i[1])
             box = self.boxes[i[0] * nb_cols + i[1]]
             if i[2] != -1:
                 box.asign_area(i[2])

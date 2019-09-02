@@ -24,6 +24,9 @@ class Finder:
         # data[0] = AP1 , AP2, ... , zone
         X = list()
         y = list()
+        if len(data) <= 1:
+            print("Not enough data to train")
+            return
         for e in data:
             X.append(e[:-1])
             y.append(e[-1])

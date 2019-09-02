@@ -128,9 +128,18 @@ class Ev3Context:
 
     """return the estimated position according to a set of positions"""
 
-    def askScanForPosition_Callback(self, scan):
+    def askScanForPosition_Callback(self, lines):
         print("askScanForPosition_Callback")
-        print(scan)
+        #lines = scan
+        lines = lines.split("\n")
+        address = list()
+        signals = list()
+        for i in range(0, int(len(lines) - 1), 3):
+            name = lines[i + 2].split(" ")[1]
+            address.append(lines[i].split(" ")[1])
+            signals.append(int(float(lines[i + 1].split(" ")[1])))
+
+        print(signals)
         return
 
     def relative_position(self, positions):
