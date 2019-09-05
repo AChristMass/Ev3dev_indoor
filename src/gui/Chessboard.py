@@ -20,19 +20,21 @@ class Chessboard:
         self.selected_area = None
         self.area_flag = False
         self.interface = interface
-
         self.originx = 0
         self.originy = 0
+        self.fill_box_list(canvas)
+        self.load_cases_list()
+
+    def fill_box_list(self, canvas):
         for i in range(0, int(self.width / self.xpas)):
             for j in range(0, int(self.height / self.ypas)):
                 self.boxes.append(
                     Box(self.xpas * i, self.ypas * j, self.xpas * i + self.xpas, self.ypas * j + self.ypas, canvas,
                         self))
-        self.load_cases_list()
 
     def draw_boxes(self):
         for i in self.boxes:
-            i.draw_box(self.zoom, self.originx, self.originy)
+            i.draw_box(self.zoom, self.originx, self.originy, "LightSkyBlue1")
 
     def show_hide_area(self):
         if self.area_flag is False:
@@ -62,59 +64,46 @@ class Chessboard:
 
     def get_box(self, x, y):
         nb_cols = int(self.height / self.ypas)
-
         cols = int((y / self.ypas) / self.zoom)
         rows = int((x / self.xpas) / self.zoom)
-
         box_number = int(rows * nb_cols + cols)
-
         return self.boxes[box_number]
 
     def select_box(self, x, y):
         ox = x + self.originx
         oy = y + self.originy
-
         x += self.originx % (self.zoom * self.xpas)
         y += self.originy % (self.zoom * self.ypas)
 
         if self.selected_box and self.selected_box.get_area() is None:
-            self.selected_box.draw_box(self.zoom, self.originx, self.originy)
+            self.selected_box.draw_box(self.zoom, self.originx, self.originy, "LightSkyBlue1")
         if self.selected_area is not None and self.area_flag is False:
             self.areas_list[self.selected_area].undraw_boxes(self.zoom, self.originx, self.originy)
 
         nb_cols = int(self.height / self.ypas)
-
         cols = int((oy / self.ypas) / self.zoom)
         rows = int((ox / self.xpas) / self.zoom)
         print("case : ", rows, cols)
         box_number = int(rows * nb_cols + cols)
-
         box = self.boxes[box_number]
         self.selected_box = box
-        box.draw_box_red(self.zoom, self.originx, self.originy)
-
+        box.draw_box(self.zoom, self.originx, self.originy, "red")
         area = box.get_area()
-
         if area is not None:
             self.areas_list[area].draw_boxes(self.zoom, self.originx, self.originy)
             self.selected_area = box.get_area()
 
     def create_area(self):
         area = Area(self.canvas)
-
         box = self.selected_box
-
         if box is None:
             return
-
         if box.get_area() is not None:
             return
-
         area.add_box(box)
         box.asign_area(Chessboard.area_id)
         self.areas_list[Chessboard.area_id] = area
         area.draw_boxes(self.zoom, self.originx, self.originy)
-
         coord_x, coord_y = self.get_box_coord()
         self.database.add_new_box(coord_x, coord_y, Chessboard.area_id)
         self.selected_area = Chessboard.area_id
@@ -128,26 +117,21 @@ class Chessboard:
         box = self.selected_box
         if self.selected_area is None:
             return
-
         if box.get_area() is not None:
             return
         box.asign_area(self.selected_area)
         self.areas_list[self.selected_area].add_box(box)
-
         self.areas_list[self.selected_area].draw_boxes(self.zoom, self.originx, self.originy)
-
         coord_x, coord_y = self.get_box_coord()
         self.database.add_new_box(coord_x, coord_y, self.selected_area)
 
     def remove_box_from_area(self):
         box = self.selected_box
-
         if box.get_area() is None:
             return
         box.asign_area(None)
-
         self.areas_list[self.selected_area].remove_box(box)
-        box.draw_box(self.zoom, self.originx, self.originy)
+        box.draw_box(self.zoom, self.originx, self.originy, "LightSkyBlue1")
         self.areas_list[self.selected_area].draw_boxes(self.zoom, self.originx, self.originy)
         coord_x, coord_y = self.get_box_coord()
         self.database.delete_area_from_case(coord_x, coord_y)

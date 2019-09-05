@@ -87,15 +87,6 @@ class Database:
         except:
             print("Fingerprint already existing.")
 
-    def printTable(self):
-        print("Print table")
-        self.cmd.execute('select * from signals')
-        for i in self.cmd:
-            print(i)
-
-    def valAbs(self, x):
-        return x if x > 0 else -x
-
     def getScans(self):
         scans = list()
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
@@ -145,15 +136,6 @@ class Database:
             self.bdd.commit()
         except:
             print("Already exist")
-
-    def show_cases(self):
-        self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
-        self.cmd = self.bdd.cursor()
-        self.cmd.execute('select * from cases')
-        print("____________")
-        for i in self.cmd:
-            print(i)
-        print("__________")
 
     def load_id_area(self):
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')

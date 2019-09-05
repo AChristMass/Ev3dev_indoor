@@ -1,4 +1,5 @@
 from tkinter import *
+from server.Server import Server
 
 
 class RobotWindow(Toplevel):
@@ -12,14 +13,13 @@ class RobotWindow(Toplevel):
         b = Button(self, text="Ok", command=self.print_robot, width=20)
         u = Button(self, text="Unselect", command=self.unselect, width=20)
         self.bind('<Escape>', lambda e: self.destroy())
-
-        for i in range(len(self.mother.robotList)):
-            self.box.insert(i, self.mother.robotList[i])
-
+        self.robotList = Server.logged
+        for i in range(len(self.robotList)):
+            self.box.insert(i, self.robotList[i])
         self.box.pack()
         u.pack(padx=1, pady=1, side='left')
         b.pack(padx=1, pady=1, side='right')
-        if not self.mother.robotList:
+        if not self.robotList:
             b.configure(state=DISABLED)
             u.configure(state=DISABLED)
         self.frame.pack()
@@ -29,17 +29,19 @@ class RobotWindow(Toplevel):
         self.mother.currentRobot = None
         self.mother.canvas.delete("all")
         self.mother.draw_map()
-        for b in self.mother.button_list:
-            b.configure(state=DISABLED)
+        self.mother.button_map["set_position"].configure(state=DISABLED)
+        self.mother.button_map["get_position"].configure(state=DISABLED)
+        self.mother.button_map["move"].configure(state=DISABLED)
         self.destroy()
 
     def print_robot(self):
         self.mother.zoom = 3
         ind = self.box.curselection()[0]
-        self.mother.currentRobot = self.mother.robotList[ind]
-        self.mother.label_msg.config(text=self.mother.currentRobot.name)
-        for b in self.mother.button_list:
-            b.configure(state=ACTIVE)
+        self.mother.currentRobot = self.robotList[ind]
+        self.mother.label_msg.config(text=self.currentRobot.name)
+        self.mother.button_map["set_position"].configure(state=ACTIVE)
+        self.mother.button_map["get_position"].configure(state=ACTIVE)
+        self.mother.button_map["move"].configure(state=ACTIVE)
         self.mother.canvas.delete("all")
         self.mother.draw_map()
         self.destroy()
