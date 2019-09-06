@@ -31,11 +31,12 @@ class Chessboard:
         self.load_cases_list()
 
     def draw_specified_area(self, id):
-        temp = None
-        for area in self.areas_list:
-            if area.id == id:
-                temp = area
-        temp.draw_specific_area(self.zoom, self.originx, self.originy)
+        print(id)
+        try:
+            area = self.areas_list[id[0]]
+            area.draw_specific_area(self.zoom, self.originx, self.originy)
+        except KeyError :
+            print("Unknown id")
 
     def draw_boxes(self):
         for i in self.boxes:

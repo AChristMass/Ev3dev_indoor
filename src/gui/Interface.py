@@ -116,10 +116,21 @@ class Interface:
         self.screen.bind("<q>", lambda e: self.chessboard.show_hide_area())
         self.screen.bind("<s>", lambda e: self.train_finder())
         self.screen.bind("<d>", lambda e: self.draw_specified_area())
+        self.screen.bind("<f>", lambda e: self.predict_from_data())
+
+    def predict_from_data(self):
+        if self.database.data_to_predict is not None :
+            self.finder.predict(self.database.data_to_predict)
+            print("Prediction Done")
+        return
+
 
     def draw_specified_area(self):
         if self.finder.prediction is not None:
             self.chessboard.draw_specified_area(self.finder.prediction)
+            print("Drawing")
+        else :
+            print("Prediction not done, you need to either train the algorithm and/or do a scan.")
 
     def train_finder(self):
         self.finder.train(self.database.get_fp_for_training())
@@ -131,6 +142,7 @@ class Interface:
         if self.currentRobot is None:
             return
         self.currentRobot.askScanForPosition()
+
 
     def hide_show_chassboard(self):
         self.database.show_cases()

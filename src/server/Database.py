@@ -11,8 +11,8 @@ class Database:
             # self.cmd.execute("create table signals (x integer, y integer,
             # bssid varchar, signal integer not null, type integer not null, PRIMARY KEY(x, y, bssid))")
             self.cmd.execute(
-                "create table FG (x integer, y integer, xc integer, yc integer ,PRIMARY KEY(xc, yc))")
-            self.cmd.execute("create table cases (x integer, y integer, area integer default -1, PRIMARY KEY(x, y))")
+                "create table FG (x integer, y integer, xc integer, yc integer)")
+            self.cmd.execute("create table cases (x integer, y integer, area integer default -1)")
         else:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
@@ -21,11 +21,32 @@ class Database:
         self.knownAPs = list()
         self.excludedAPs = set()
         self.excludedAPs.add("OnePlus")
+        self.excludedAPs.add("Redmi")
+        self.excludedAPs.add("AndroidAP2815")
+        self.excludedAPs.add("AndroidAP7398")
+        self.excludedAPs.add("Huawei P8 lite 2017")
+        self.excludedAPs.add("DIRECT-5B-HP ENVY 5000 series")
+
+
+        self.data_to_predict = None
 
         self.cmd.execute("PRAGMA table_info(FG)")
         self.cursors = [e for e in self.cmd]
         for i in self.cursors[4:]:
             self.knownAPs.append(i[1])
+
+    def store_and_flat_current_scan(self, address, signals):
+        data = list()
+
+        for ap in self.knownAPs:
+            if ap in address:
+                data.append(signals[address.index(ap)])
+            else:
+                data.append(0)
+        print(data)
+        self.data_to_predict = data
+
+        return
 
     def scan_fringerprint(self, lines, context):
         lines = lines.split("\n")
@@ -65,9 +86,14 @@ class Database:
             name = lines[i + 2].split(" ")[1]
             if name in self.excludedAPs:
                 continue
+            if str(name) == "eduroam" or str(name) == "umlv-sf-captif":
 
-            address.append(lines[i].split(" ")[1])
-            signals.append(int(float(lines[i + 1].split(" ")[1])))
+                address.append(lines[i].split(" ")[1])
+                signals.append(int(float(lines[i + 1].split(" ")[1])))
+                if signals[len(signals)-1] < -79:
+                    signals[len(signals)-1] = 0
+            else:
+                continue
 
         self.add_fingerprint_with_area(context, address, signals)
 
@@ -91,30 +117,28 @@ class Database:
                 self.knownAPs.append(bssid)
                 self.cmd.execute('ALTER TABLE FG ADD column' + '\'' + str(bssid) + '\'' + 'integer DEFAULT 0')
 
-        self.cmd.execute("PRAGMA table_info(FG)")
-        self.cursors = [e for e in self.cmd]
+        print("________________________________TABLE FG AVANT INSERT")
+        print("select * from ")
+        self.cmd.execute('SELECT * FROM  FG')
+        for i in self.cmd:
+            print(i)
 
         self.cmd.execute(
             'INSERT INTO FG(x, y, xc, yc,\'' + "','".join(bssids) + '\' ) VALUES (' + str(x) + ',' + str(
-                y) + ',' + str(
-                xc) + ',' + str(yc) + "," + ", ".join(str(signal) for signal in signals) + ')')
+                y) + ',' + str(xc) + ',' + str(yc) + "," + ", ".join(str(signal) for signal in signals) + ')')
 
         """if area is not None:
             self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(area) + ')')
         else:
             self.cmd.execute('INSERT INTO CASES(x, y, area) VALUES (' + str(x) + ',' + str(y) + ',' + str(-1) + ')')"""
 
-        print("select * from CASES")
-        self.cmd.execute('SELECT * FROM CASES')
-        for i in self.cmd:
-            print(i)
+        print("________________________________TABLE FG APRES INSERT")
 
         print("select * from ")
         self.cmd.execute('SELECT * FROM  FG')
         for i in self.cmd:
             print(i)
 
-        print("db add : " + ",".join(bssids))
         self.bdd.commit()
         return
 
@@ -122,7 +146,7 @@ class Database:
         print("___________get_fp_for_training___________")
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
-        print("select * from CASES")
+        """ print("select * from CASES")
 
         self.cmd.execute('SELECT * FROM CASES')
         for i in self.cmd:
@@ -133,32 +157,33 @@ class Database:
         for i in self.cmd:
             print(i)
 
-        print('SELECT ' + ", ".join(
-            map(str, self.knownAPs)) + ' ,area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
+        print('SELECT \'' + '\',\' '.join(
+            map(str, self.knownAPs)) + '\' ,area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')"""
 
-        print("_________TABLE_NAME_________")
+        """print("_________TABLE_NAME_________")
         self.cmd.execute("PRAGMA table_info(FG)")
         self.cursors = [e for e in self.cmd]
         for i in self.cursors[4:]:
             print(i[1])
 
-        print("_________TABLE_NAME_________")
+        print("_________TABLE_NAME_________")"""
 
         self.cmd.execute(
-            'SELECT ' + ', '.join(
-                map(str, self.knownAPs)) + ' ,area FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
+            'SELECT * FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')
 
         """self.cmd.execute(
             'SELECT * FROM CASES JOIN FG WHERE CASES.x = FG.xc AND CASES.y = FG.yc')"""
 
-        print("_____________SQL CALL DONE______________")
         data = list()
         for i in self.cmd:
-            print("____________")
-            print(i)
-            print("____________")
-            data.append(i)
-        print("___________get_fp_for_training___________")
+
+            temp = list()
+
+            for j in range(7, len(i)):
+                temp.append(i[j])
+            temp.append(i[2])
+            data.append(temp)
+
         return data
 
     def printTable(self):

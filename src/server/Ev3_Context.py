@@ -139,8 +139,8 @@ class Ev3Context:
             address.append(lines[i].split(" ")[1])
             signals.append(int(float(lines[i + 1].split(" ")[1])))
 
-        print(signals)
-        return
+
+        self.server.database.store_and_flat_current_scan(address, signals)
 
     def relative_position(self, positions):
         # One position --> (0.015215327576699661, 629, 114) -> Coef | x | y

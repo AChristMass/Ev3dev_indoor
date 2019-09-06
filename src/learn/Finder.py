@@ -12,7 +12,7 @@ class Finder:
         if os.path.isfile('knn_clf.joblib'):
             self.clf = load('knn_clf.joblib')
         else:
-            self.clf = neighbors.KNeighborsClassifier(n_neighbors=3)
+            self.clf = neighbors.KNeighborsClassifier(n_neighbors=1)
 
     def save(self):
         dump(self.clf, 'knn_clf.joblib')
@@ -31,8 +31,13 @@ class Finder:
             X.append(e[:-1])
             y.append(e[-1])
 
+
         X = np.asarray(X)
         y = np.asarray(y)
+        print("_________data for training_________")
+        print(X)
+        print(y)
+        print("_________data for training_________")
         self.clf.fit(X, y)
         self.trained = True
         print("Finder correctly trained")
@@ -41,4 +46,5 @@ class Finder:
         if self.trained is False:
             print("Can't give localisation without training")
             return
+        data = np.asarray(data)
         self.prediction = self.clf.predict(data.reshape(1, -1))
