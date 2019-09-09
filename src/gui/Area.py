@@ -14,12 +14,10 @@ class Area:
     def add_box(self, box):
         self.boxes.append(box)
         local_seg = set()
-
         local_seg.add(((box.x1, box.y1), (box.x2, box.y1)))
         local_seg.add(((box.x2, box.y1), (box.x2, box.y2)))
         local_seg.add(((box.x2, box.y2), (box.x1, box.y2)))
         local_seg.add(((box.x1, box.y2), (box.x1, box.y1)))
-
         for seg in local_seg:
             if seg in self.segment:
                 self.segment.remove(seg)
@@ -41,14 +39,11 @@ class Area:
 
     def remove_box(self, box):
         self.boxes.remove(box)
-
         local_seg = set()
-
         local_seg.add(((box.x1, box.y1), (box.x2, box.y1)))
         local_seg.add(((box.x2, box.y1), (box.x2, box.y2)))
         local_seg.add(((box.x2, box.y2), (box.x1, box.y2)))
         local_seg.add(((box.x1, box.y2), (box.x1, box.y1)))
-
         for seg in local_seg:
             if seg in self.segment:
                 self.segment.remove(seg)
@@ -59,12 +54,10 @@ class Area:
 
     def draw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
-            i.draw_box_area(zoom, originx, originy)
+            i.draw_box(zoom, originx, originy, "grey")
         self.draw_area(zoom, originx, originy)
 
     def undraw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
-            i.draw_box(zoom, originx, originy)
+            i.draw_box(zoom, originx, originy, "LightSkyBlue1")
 
-    def valAbs(self, x):
-        return -x if x < 0 else x
