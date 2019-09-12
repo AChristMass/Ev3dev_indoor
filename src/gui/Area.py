@@ -31,6 +31,11 @@ class Area:
             self.canvas.create_line(seg[0][0] * zoom - originx, seg[0][1] * zoom - originy,
                                     seg[1][0] * zoom - originx, seg[1][1] * zoom - originy, fill="red2")
 
+    def draw_specific_area(self, zoom, originx, originy):
+        for seg in self.segment:
+            self.canvas.create_line(seg[0][0] * zoom - originx, seg[0][1] * zoom - originy,
+                                    seg[1][0] * zoom - originx, seg[1][1] * zoom - originy, fill="green")
+
     def remove_box(self, box):
         self.boxes.remove(box)
         local_seg = set()
@@ -54,4 +59,3 @@ class Area:
     def undraw_boxes(self, zoom, originx, originy):
         for i in self.boxes:
             i.draw_box(zoom, originx, originy, "LightSkyBlue1")
-

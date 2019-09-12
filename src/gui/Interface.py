@@ -7,6 +7,8 @@ from PIL import ImageTk
 from gui.Chessboard import Chessboard
 from gui.Map import Map
 from gui.RobotWindow import RobotWindow
+from learn.Finder import Finder
+from server.Server import Server
 
 
 class Interface:
@@ -42,6 +44,7 @@ class Interface:
 
         self.mapMat = self.load_map()
         self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database, self)
+        self.finder = Finder()
 
         self.fingerPrintList = self.database.get_fp_list()
         self.is_finger_print_visible = False
@@ -52,6 +55,25 @@ class Interface:
     def set_button_map(self, button_map):
         self.button_map = button_map
 
+    def predict_from_data(self):
+        if self.database.data_to_predict is not None :
+            self.finder.predict(self.database.data_to_predict)
+            print("Prediction Done")
+        return
+
+
+    def draw_specified_area(self):
+        if self.finder.prediction is not None:
+            self.chessboard.draw_specified_area(self.finder.prediction)
+            print("Drawing")
+        else :
+            print("Prediction not done, you need to either train the algorithm and/or do a scan.")
+
+    def train_finder(self):
+        self.finder.train(self.database.get_fp_for_training())
+
+    def nothing(self):
+        return
     def load_frame_map(self):
         frame_map = {
             "maps": Frame(self.screen, width=self.width, height=self.height * 11 / 12, borderwidth=0, relief="solid"),
@@ -78,8 +100,14 @@ class Interface:
                      "zoomdown": ImageTk.PhotoImage(Image.open('../asset/zoomdown.png')),
                      "radar": ImageTk.PhotoImage(Image.open('../asset/radar.png'))
                      }
+    def askScanForPosition(self):
+        if self.currentRobot is None:
+            return
+        self.currentRobot.askScanForPosition()
+
 
     def hide_show_chessboard(self):
+        self.database.show_cases()
         if self.chessboard_flag is False:
             self.chessboard_flag = True
             self.chessboard.draw_boxes()
@@ -125,6 +153,10 @@ class Interface:
         if self.currentRobot is None:
             return
         self.fingerPrintList.append((self.currentRobot.x, self.currentRobot.y))
+        box_coords = self.chessboard.get_box_coord_with_coord(self.currentRobot.x, self.currentRobot.y)
+        self.currentRobot.xc = box_coords[0]
+        self.currentRobot.yc = box_coords[1]
+
         self.currentRobot.askScan()
 
     def show_finger_print(self):
@@ -199,7 +231,7 @@ class Interface:
             self.currentRobot.x = x
             self.currentRobot.y = y
             self.currentRobot.area = self.chessboard.get_box(x,y).area
-            self.button_map["set_position"]["borderwidth"] = 1
+            self.button_list[2]["borderwidth"] = 1
             self.draw_map()
             return
         if self.chessboard_flag is not False:
@@ -229,14 +261,13 @@ class Interface:
     def set_position(self):
         if self.position_flag:
             self.position_flag = False
-            self.button_map["set_position"]["borderwidth"] = 1
+            self.button_list[2]["borderwidth"] = 1
         else:
             self.position_flag = True
-            self.button_map["set_position"]["borderwidth"] = 2
+            self.button_list[2]["borderwidth"] = 5
 
     def draw_map(self):
         self.canvas.delete("all")
-        print("origin : ", self.origin_x, self.origin_y)
         largeur = self.width
         hauteur = int(self.height * (11 / 12))
         self.canvas.create_rectangle(0 - self.origin_x, 0 - self.origin_y, self.mapMat.x * self.zoom - self.origin_x,
@@ -265,6 +296,8 @@ class Interface:
                              -self.currentRobot.y * self.zoom + hauteur / 2)
             self.origin_x -= -self.currentRobot.x * self.zoom + largeur / 2
             self.origin_y -= -self.currentRobot.y * self.zoom + hauteur / 2
+            self.chessboard.originx = self.origin_x
+            self.chessboard.originy = self.origin_y
         if self.fp_draw_list:
             for pos in self.fingerPrintList:
                 self.fp_draw_list.append(

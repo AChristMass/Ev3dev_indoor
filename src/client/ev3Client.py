@@ -5,11 +5,14 @@ from uuid import getnode as get_mac
 
 from client.Request import Request
 
-
 # sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'
 
+
+"""This script is use to run the Lego Mindstorm ev3, this client wait for instruction from the server and respond acocrdingly"""
+
+
 class Client:
-    #server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __init__(self, host, port):
         self.host = host
@@ -26,6 +29,8 @@ class Client:
         self.pending = ""
         self.launched = True
         self.macAdress = hex(get_mac())
+
+    """indentify the client to the server"""
 
     def launch(self):
         self.server_connection.send(b"ev3")
@@ -45,10 +50,11 @@ class Client:
         scan = subprocess.check_output(
             "echo maker | sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'",
             shell=True)
-        #self.server_connection.send(("3" + scan.decode("utf-8") + "`").encode())
+        # self.server_connection.send(("3" + scan.decode("utf-8") + "`").encode())
         print("Sending scan...")
         return scan.decode("utf-8")
-        
+
+    """Read packet from the sever"""
 
     def doRead(self):
         recv = self.server_connection.recv(1024)
@@ -70,6 +76,8 @@ class Client:
 
         for request in recv:
             self.processIn(request)
+
+    """Process the server request contained in a packet"""
 
     def processIn(self, request):
         self.state = self.request.process(request)

@@ -35,7 +35,6 @@ class RobotWindow(Toplevel):
         self.destroy()
 
     def print_robot(self):
-        self.mother.zoom = 3
         ind = self.box.curselection()[0]
         self.mother.currentRobot = self.robotList[ind]
         self.mother.label_msg.config(text=self.currentRobot.name)
