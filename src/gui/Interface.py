@@ -268,7 +268,6 @@ class Interface:
 
     def draw_map(self):
         self.canvas.delete("all")
-        print("origin : ", self.origin_x, self.origin_y)
         largeur = self.width
         hauteur = int(self.height * (11 / 12))
         self.canvas.create_rectangle(0 - self.origin_x, 0 - self.origin_y, self.mapMat.x * self.zoom - self.origin_x,

@@ -14,7 +14,7 @@ class Ev3Context:
         self.pending = ""  # Use to store data from an incompleted frame (Like a from who would take two calls to SOCKET.recv() to be completed)
         self.request.register(1, lambda x: self.registerMacAdress(x[3:]))
         self.request.register(2, lambda x: print(x[1:]))
-        self.request.register(3, lambda x: self.server.database.scan_fringerprint_with_area(x[1:], self))
+        self.request.register(3, lambda x: self.server.database.scan_fingerprint_with_area(x[1:], self))
         self.request.register(4, lambda x: self.askScanForPosition_Callback(x[1:]))
         self.request.register(5, lambda x: self.askDistance_Callback(x[1:]))
         self.x = 629
@@ -90,41 +90,6 @@ class Ev3Context:
     def askScanForPosition(self):
         self.client.send(b"4scan`")
 
-    """Callback functions for "askScanForPosition" """
-
-    def askScanForPosition_Callback2(self, scan):
-        N = 7  # number of fingerprint used
-        current_fingerprint = list()  # One scan from current_fingerprint =  ('70:28:8b:d4:53:49', -71)
-        scan = scan.split("\n")
-        print("Current fg = ")
-        for i in range(0, int(len(scan) - 1), 3):
-            addr = scan[i].split(" ")[1]
-            signal = scan[i + 1].split(" ")[1]
-            name = scan[i+2].split(" ")[1]
-            if name == "OnePlus" :
-                continue
-            current_fingerprint.append((addr, signal))
-            print("addr : ", addr)
-
-        fingerprints = self.server.database.getFingerprints()  # One scan from fingerprints = (711, 110, '70:28:8b:d4:53:49', -71)
-
-        self.print_difference_between_current_and_dbfg(current_fingerprint, fingerprints)
-
-        fingerprint_with_value = list()
-        for fg in fingerprints:
-            fingerprint_with_value.append(self.fingerprintValue2(current_fingerprint, fg))
-
-        sorted_fingerprints = sorted(fingerprint_with_value, key=lambda x: x[0])
-
-        if len(sorted_fingerprints) > N:
-            sorted_fingerprints = sorted_fingerprints[len(sorted_fingerprints) - N:]
-        print(sorted_fingerprints)
-
-        pos = self.relative_position(sorted_fingerprints)
-
-        print("Relative position is : ", pos)
-        self.x = pos[0]
-        self.y = pos[1]
 
     """return the estimated position according to a set of positions"""
 
