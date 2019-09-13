@@ -6,6 +6,7 @@ from server.Server import Server
 
 
 class Core:
+    '''core class of the program, launch a server on one side, and interface ( GUI part) on another'''
 
     def __init__(self, host, port):
         self.database = Database()
@@ -25,6 +26,7 @@ class Core:
         self.screen.mainloop()
 
     def binding(self):
+        '''bind a method to a key'''
         self.screen.bind('<Escape>', lambda e: self.screen.destroy())
         self.screen.bind("<Left>", lambda e: self.interface.move_left())
         self.screen.bind("<Up>", lambda e: self.interface.move_up())
@@ -47,6 +49,7 @@ class Core:
         self.screen.bind("<q>", lambda e: self.interface.chessboard.show_hide_area())
 
     def set_up_buttons(self):
+        '''bind a method to a button'''
         maps = {
             "add_robot": Button(self.interface.frame_map["first_box"], image=self.interface.image_map["add"],
                                 command=self.interface.add_robot),
@@ -97,4 +100,5 @@ class Core:
         return maps
 
     def nothing(self):
+        '''use on "binding" and "set_up_buttons" when the method is not create yet'''
         return
