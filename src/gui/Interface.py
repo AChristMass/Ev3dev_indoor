@@ -7,11 +7,10 @@ from PIL import ImageTk
 from gui.Chessboard import Chessboard
 from gui.Map import Map
 from gui.RobotWindow import RobotWindow
-from learn.Finder import Finder
-from server.Server import Server
 
 
 class Interface:
+    '''main class for the GUI'''
     step = 100
 
     def __init__(self, database, currentRobot):
@@ -44,7 +43,6 @@ class Interface:
 
         self.mapMat = self.load_map()
         self.chessboard = Chessboard(self.canvas, self.zoom, self.mapMat.x, self.mapMat.y, self.database, self)
-        self.finder = Finder()
 
         self.fingerPrintList = self.database.get_fp_list()
         self.is_finger_print_visible = False
@@ -53,28 +51,11 @@ class Interface:
         self.create_interface()
 
     def set_button_map(self, button_map):
+        '''set the dictionnary that contains all buttons'''
         self.button_map = button_map
 
-    def predict_from_data(self):
-        if self.database.data_to_predict is not None :
-            self.finder.predict(self.database.data_to_predict)
-            print("Prediction Done")
-        return
-
-
-    def draw_specified_area(self):
-        if self.finder.prediction is not None:
-            self.chessboard.draw_specified_area(self.finder.prediction)
-            print("Drawing")
-        else :
-            print("Prediction not done, you need to either train the algorithm and/or do a scan.")
-
-    def train_finder(self):
-        self.finder.train(self.database.get_fp_for_training())
-
-    def nothing(self):
-        return
     def load_frame_map(self):
+        '''create and fill the dictionnary that contains all frame object's'''
         frame_map = {
             "maps": Frame(self.screen, width=self.width, height=self.height * 11 / 12, borderwidth=0, relief="solid"),
             "menu": Frame(self.screen, height=self.height * (1 / 12), borderwidth=2, relief="solid")
@@ -88,6 +69,7 @@ class Interface:
 
     @staticmethod
     def load_image():
+        '''load all assets and stock them on a dictionnary'''
         return {"add": ImageTk.PhotoImage(Image.open('../asset/add.png')),
                      "remove": ImageTk.PhotoImage(Image.open('../asset/remove.png')),
                      "robot": ImageTk.PhotoImage(Image.open('../asset/robot.png')),
@@ -100,13 +82,9 @@ class Interface:
                      "zoomdown": ImageTk.PhotoImage(Image.open('../asset/zoomdown.png')),
                      "radar": ImageTk.PhotoImage(Image.open('../asset/radar.png'))
                      }
-    def askScanForPosition(self):
-        if self.currentRobot is None:
-            return
-        self.currentRobot.askScanForPosition()
-
 
     def hide_show_chessboard(self):
+        '''display the chessboard if the flag is false, else delete it'''
         if self.chessboard_flag is False:
             self.chessboard_flag = True
             self.chessboard.draw_boxes()
@@ -115,6 +93,7 @@ class Interface:
             self.draw_map()
 
     def set_up_frame(self):
+        """config all frame from @self.frame_map"""
         self.frame_map["maps"].pack(expand=False, fill="both", padx=0, pady=0)
         self.frame_map["menu"].pack(expand=True, fill="both", padx=0, pady=0)
 
@@ -132,11 +111,13 @@ class Interface:
         self.frame_map["fifth_box"].propagate(0)
 
     def get_robot_position(self):
+        '''ask for a scan to obtains the robot location'''
         if self.currentRobot is None:
             return
         self.currentRobot.askScanForPosition()
 
     def change_step(self):
+        '''change the step for the scrolling speed, change with button on the GUI'''
         n = int(self.entry_box.get())
         self.screen.focus_force()
         if 0 < n < 200:
@@ -146,19 +127,18 @@ class Interface:
             self.entry_box.insert(0, str(Interface.step))
 
     def add_robot(self):
+        '''coming soon'''
         return
 
     def scan_request(self):
+        '''ask a scan to the current robot to create a fingerprint at his position'''
         if self.currentRobot is None:
             return
         self.fingerPrintList.append((self.currentRobot.x, self.currentRobot.y))
-        box_coords = self.chessboard.get_box_coord_with_coord(self.currentRobot.x, self.currentRobot.y)
-        self.currentRobot.xc = box_coords[0]
-        self.currentRobot.yc = box_coords[1]
-
         self.currentRobot.askScan()
 
     def show_finger_print(self):
+        '''if the flag is false display all fingerprints else delete them'''
         if self.is_finger_print_visible:
             self.is_finger_print_visible = False
             self.button_map["show_fp"]["borderwidth"] = 1
@@ -180,26 +160,31 @@ class Interface:
             self.button_map["show_fp"]["borderwidth"] = 2
 
     def move_right(self):
+        '''move the camera to the right'''
         self.canvas.move("all", -Interface.step, 0)
         self.origin_x -= -Interface.step
         self.chessboard.originx = self.origin_x
 
     def move_left(self):
+        '''move the camera to the left'''
         self.canvas.move("all", Interface.step, 0)
         self.origin_x -= Interface.step
         self.chessboard.originx = self.origin_x
 
     def move_up(self):
+        '''move the camera up'''
         self.canvas.move("all", 0, Interface.step)
         self.origin_y -= Interface.step
         self.chessboard.originy = self.origin_y
 
     def move_down(self):
+        '''move the camera down'''
         self.canvas.move("all", 0, -Interface.step)
         self.origin_y -= -Interface.step
         self.chessboard.originy = self.origin_y
 
     def zoom_up(self):
+        '''zoom in'''
         self.origin_x, self.origin_y = 0, 0
         self.chessboard.originx, self.chessboard.originy = 0, 0
         if self.zoom != 8:
@@ -208,6 +193,7 @@ class Interface:
         self.draw_map()
 
     def zoom_down(self):
+        '''zoom out'''
         self.origin_x, self.origin_y = 0, 0
         self.chessboard.originx, self.chessboard.originy = 0, 0
         if self.zoom != 1:
@@ -216,6 +202,7 @@ class Interface:
         self.draw_map()
 
     def on_click(self):
+        '''if the flag is true, get the coordinate of the click then find the corresponding box'''
         if self.position_flag:
             x, y = self.screen.winfo_pointerxy()
             if y > self.height * 11 / 12:
@@ -230,7 +217,7 @@ class Interface:
             self.currentRobot.x = x
             self.currentRobot.y = y
             self.currentRobot.area = self.chessboard.get_box(x,y).area
-            self.button_list[2]["borderwidth"] = 1
+            self.button_map["set_position"]["borderwidth"] = 1
             self.draw_map()
             return
         if self.chessboard_flag is not False:
@@ -239,6 +226,7 @@ class Interface:
             self.selected_box = self.chessboard.selected_box
 
     def create_interface(self):
+        '''call at the creation of the object, initialise somes things'''
         Label(self.frame_map["first_box"], text="Robots").pack()
         Label(self.frame_map["third_box"], text="Fingerprint").pack()
         Label(self.frame_map["fourth_box"], text="Chessboard").pack()
@@ -250,23 +238,28 @@ class Interface:
         self.draw_map()
 
     def set_robot(self):
+        '''call when we choose a rebot'''
         RobotWindow(self, self.screen)
 
     @staticmethod
     def load_map():
+        '''load the map from a text file on /map'''
         m = Map("file.txt")
         return m
 
     def set_position(self):
+        '''change the flag to true if we want to set a robot location, else put it to false'''
         if self.position_flag:
             self.position_flag = False
-            self.button_list[2]["borderwidth"] = 1
+            self.button_map["set_position"]["borderwidth"] = 1
         else:
             self.position_flag = True
-            self.button_list[2]["borderwidth"] = 5
+            self.button_map["set_position"]["borderwidth"] = 2
 
     def draw_map(self):
+        '''main display method'''
         self.canvas.delete("all")
+        print("origin : ", self.origin_x, self.origin_y)
         largeur = self.width
         hauteur = int(self.height * (11 / 12))
         self.canvas.create_rectangle(0 - self.origin_x, 0 - self.origin_y, self.mapMat.x * self.zoom - self.origin_x,
@@ -295,8 +288,6 @@ class Interface:
                              -self.currentRobot.y * self.zoom + hauteur / 2)
             self.origin_x -= -self.currentRobot.x * self.zoom + largeur / 2
             self.origin_y -= -self.currentRobot.y * self.zoom + hauteur / 2
-            self.chessboard.originx = self.origin_x
-            self.chessboard.originy = self.origin_y
         if self.fp_draw_list:
             for pos in self.fingerPrintList:
                 self.fp_draw_list.append(

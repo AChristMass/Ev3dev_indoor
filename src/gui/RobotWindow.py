@@ -3,6 +3,7 @@ from server.Server import Server
 
 
 class RobotWindow(Toplevel):
+    '''new window for selecting a robot'''
     def __init__(self, mother, root):
         Toplevel.__init__(self, root)
         self.geometry("600x400")
@@ -10,7 +11,7 @@ class RobotWindow(Toplevel):
         self.frame = Frame(self)
         self.box = Listbox(self)
         self.box.pack(fill="both", expand=YES)
-        b = Button(self, text="Ok", command=self.print_robot, width=20)
+        b = Button(self, text="Ok", command=self.select_robot, width=20)
         u = Button(self, text="Unselect", command=self.unselect, width=20)
         self.bind('<Escape>', lambda e: self.destroy())
         self.robotList = Server.logged
@@ -25,6 +26,7 @@ class RobotWindow(Toplevel):
         self.frame.pack()
 
     def unselect(self):
+        '''unselect robot -> put current_robot to None and reset configuration'''
         self.mother.label_msg.config(text="Select a Robot")
         self.mother.currentRobot = None
         self.mother.canvas.delete("all")
@@ -34,7 +36,9 @@ class RobotWindow(Toplevel):
         self.mother.button_map["move"].configure(state=DISABLED)
         self.destroy()
 
-    def print_robot(self):
+    def select_robot(self):
+        '''select the robot chosen and put it on current_robot'''
+        self.mother.zoom = 3
         ind = self.box.curselection()[0]
         self.mother.currentRobot = self.robotList[ind]
         self.mother.label_msg.config(text=self.currentRobot.name)

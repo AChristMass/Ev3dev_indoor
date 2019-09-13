@@ -1,4 +1,5 @@
 class Map:
+    '''load the map on a matrix from a text file'''
     def __init__(self, name):
         self.file = open("../map/" + name, "r")
         self.map = self.load_map(self.file)
@@ -7,6 +8,7 @@ class Map:
 
     @staticmethod
     def load_map(file):
+        '''read line per line the text file and load it on a list'''
         t = file.readlines()
         maps = []
         for line in t:
