@@ -107,7 +107,6 @@ class Interface:
 
 
     def hide_show_chessboard(self):
-        self.database.show_cases()
         if self.chessboard_flag is False:
             self.chessboard_flag = True
             self.chessboard.draw_boxes()
