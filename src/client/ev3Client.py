@@ -5,13 +5,16 @@ from uuid import getnode as get_mac
 
 from client.Request import Request
 
+"""This script is use to run the Lego Mindstorm ev3, the Client class wait for instruction from 
+the server and respond acocrdingly. You may change the ip given in the main, 
+by the ip of the device your server is running on."""
+
+# command to launch a scan :
 # sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'
 
 
-"""This script is use to run the Lego Mindstorm ev3, this client wait for instruction from the server and respond acocrdingly"""
-
-
 class Client:
+    """This class Client is used to manage communication between the robot and the server."""
     # server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __init__(self, host, port):
@@ -30,9 +33,8 @@ class Client:
         self.launched = True
         self.macAdress = hex(get_mac())
 
-    """indentify the client to the server"""
-
     def launch(self):
+        """Identify the client (which is running on the ev3) to the server"""
         self.server_connection.send(b"ev3")
         identification = self.server_connection.recv(1024)
         if identification == "refused":
@@ -45,8 +47,8 @@ class Client:
 
         self.server_connection.close()
 
-    # Scan and send to the server RSSI signaturen
     def scan(self, request):
+        """Scan and send to the server RSSI signaturen it use iw which migth not be installed on every ev3"""
         scan = subprocess.check_output(
             "echo maker | sudo -S iw dev wlx4494fcf51bd0 scan | grep -o 'BSS ..\:..\:..\:..\:..\:..\|SSID: .*\|signal\: .*'",
             shell=True)
@@ -54,9 +56,8 @@ class Client:
         print("Sending scan...")
         return scan.decode("utf-8")
 
-    """Read packet from the sever"""
-
     def doRead(self):
+        """Read packet from the sever"""
         recv = self.server_connection.recv(1024)
         last = str(recv.decode())
         recv = str(recv.decode()).split("`")
@@ -77,9 +78,8 @@ class Client:
         for request in recv:
             self.processIn(request)
 
-    """Process the server request contained in a packet"""
-
     def processIn(self, request):
+        """Process the server request contained in a packet"""
         self.state = self.request.process(request)
         if self.state == Request.State.ERROR:
             print("Can't deal that kind of packets")

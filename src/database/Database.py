@@ -1,11 +1,12 @@
 import os.path
 import sqlite3
 
-"""This class is used to create a Database, it contains every methods needed 
-to add, alter or delete data on the database."""
+
 
 
 class Database:
+    """This class is used to create a Database, it contains every methods needed
+    to add, alter or delete data on the database."""
     def __init__(self):
         if not os.path.isfile("../bdd/fingerPrint.db"):
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
@@ -37,9 +38,10 @@ class Database:
         for i in self.cursors[4:]:
             self.knownAPs.append(i[1])
 
-    """Store a scan into @self.data_to_predict after adding undetected APs to this scan"""
+
 
     def store_and_flat_current_scan(self, address, signals):
+        """Store a scan into @self.data_to_predict after adding undetected APs to this scan"""
         data = list()
 
         for ap in self.knownAPs:
@@ -52,9 +54,10 @@ class Database:
 
         return
 
-    """Interpret data from a scan ,then call @self.add_fingerprint_with_area"""
+
 
     def scan_fingerprint_with_area(self, lines, context):
+        """Interpret data from a scan ,then call @self.add_fingerprint_with_area"""
         lines = lines.split("\n")
         address = list()
         signals = list()
@@ -73,10 +76,11 @@ class Database:
 
         self.add_fingerprint_with_area(context, address, signals)
 
-    """Add new fingerprint to the database, also change 
-    the table by adding new column for each unknown new APs"""
+
 
     def add_fingerprint_with_area(self, context, bssids, signals):
+        """Add new fingerprint to the database, also change
+        the table by adding new column for each unknown new APs"""
         # The next 3 lines are here because you have to reconnect the bdd,
         # otherwize you'll get a "SqLite object created in an other Thread error,
         # that's a known error with sqlite3 "
@@ -104,10 +108,11 @@ class Database:
         self.bdd.commit()
         return
 
-    """Return every fingerprint with the area where each 
-    fingerprints as been done for Machine Learning training"""
+
 
     def get_fp_for_training(self):
+        """Return every fingerprint with the area where each
+        fingerprints as been done for Machine Learning training"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
 
@@ -126,9 +131,10 @@ class Database:
 
         return data
 
-    """Return the fingerprints stored in the database"""
+
 
     def getScans(self):
+        """Return the fingerprints stored in the database"""
         scans = list()
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
@@ -137,10 +143,11 @@ class Database:
             scans.append(i[:-1])
         return scans
 
-    """Return the position of every fingerprints in the database 
-    if they are in the same location only one set of coordinate is send"""
+
 
     def get_fp_list(self):
+        """Return the position of every fingerprints in the database
+        if they are in the same location only one set of coordinate is send"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
         self.cmd.execute('select DISTINCT x, y from FG')
@@ -151,9 +158,10 @@ class Database:
 
         return scans
 
-    """Add a box to the database with his position and the area the box is inside"""
+
 
     def add_new_box(self, x, y, area):
+        """Add a box to the database with his position and the area the box is inside"""
         try:
             self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
             self.cmd = self.bdd.cursor()
@@ -165,9 +173,10 @@ class Database:
         except:
             print("Already exist")
 
-    """Get the number of area stored in the database"""
+
 
     def load_id_area(self):
+        """Return how many areas are stored in the database"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
         self.cmd.execute('select max(area) from cases')
@@ -176,25 +185,28 @@ class Database:
             id = i
         return id[0]
 
-    """Remove an area linked to a Box"""
+
 
     def delete_area_from_case(self, x, y):
+        """Remove the area at (x,y)"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
         self.cmd.execute('update cases set area = -1 where x =' + str(x) + ' and ' + str(y))
         self.bdd.commit()
 
-    """Get Boxes stored int the database"""
+
 
     def load_cases(self):
+        """Return Boxes stored int the database"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
         self.cmd.execute('select x, y, area from cases')
         return self.cmd
 
-    """Get areas stored in the database"""
+
 
     def load_areas(self):
+        """Return areas stored in the database"""
         self.bdd = sqlite3.connect('../bdd/fingerPrint.db')
         self.cmd = self.bdd.cursor()
         self.cmd.execute('select distinct area from cases')
