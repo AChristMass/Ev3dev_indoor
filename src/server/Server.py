@@ -2,11 +2,11 @@ import select
 import socket
 import threading
 
-from database.Database import Database
 from server.Ev3_Context import Ev3Context
 
 
 class Server:
+    """The server is usually run on his own thread, it accepted new client and listen to them."""
     contextsAvailable = list("ev3")
     lock = threading.Lock()
     logged = list()  # Store connected client with an active context
@@ -26,9 +26,10 @@ class Server:
 
     # Main loop, can register new clients and call processKey for each clients who can be read or write
     def launch(self):
+        """This is the main loop which listen to client, it called @self.process_clients() to treat client(s)"""
         nb_clients = 0
         while threading.current_thread().is_alive():
-            if (len(self.connected_clients) != nb_clients):
+            if len(self.connected_clients) != nb_clients:
                 print("Connected clients : ", len(self.connected_clients))
                 nb_clients = len(self.connected_clients)
 
@@ -41,14 +42,16 @@ class Server:
                         str(infos_connection)] = None  # Add an entry according to the ip addr and port of a client
 
             if len(self.connected_clients) > 0:
-                self.processClients()
+                self.process_clients()
 
         for client in self.connected_clients:
             client.close()
 
         self.server_connection.close()
 
-    def processClients(self):
+    def process_clients(self):
+        """Identify new clients by creating a new context associated to them
+        (you can add yourself your own context here), or call the doRead function of the associated context."""
         try:
             clients_toRead, wlist, xlist = select.select(self.connected_clients, [], [], 0.05)
         except select.error:
