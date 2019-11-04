@@ -1,0 +1,9 @@
+Quel est le nom du projet (si il en a un) ?
+
+Quand a commencé le développement du projet et pourquoi ?
+
+A qui servira le projet ?
+
+Pre traitement de l'ifc avec revit avant envoi au serveur (ajout des ancres)?
+
+Faut il rendre le DDOT le 10 ?
