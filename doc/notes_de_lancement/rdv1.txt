@@ -1,0 +1,40 @@
+Ce qu'on a déjà:
+
+localisation indoor
+selection de chemins
+
+ce qu'on va faire:
+récuperer le plan ifc d'un batiment
+serveur BIM
+
+une fois le robot localisé:
+on récupere l'étage
+tracé de graphe acyclique vers une destination représentant toutes les possibilité de la position du robot vers un endroit du batiment donné (évacuation par exemple)
+On programme dans le serveur la mission du robot (destination)
+
+Revit permet de modifier la maquette (rajouter un étage, rajouter les bornes, rajouter des informations pour une extraction automatique)
+
+importation des bornes dans la maquette numérique
+
+Entité:
+* notre robot
+* le serveur (BIM serveur en fait partie)
+* les points d'accès (ancres, anchors,  balises)
+* Les clients
+
+Prévoir plusieurs types de robot (dans l'extraction des chemins)
+
+changement d'étage
+
+revoir jaid, jeremy johan pour recuperer le code
+
+input:
+Robot + position + maquette + mission
+sortie:
+un chemin (adapté au type de robot)
+
+graphes:
+dodag rpl dag
+
+appli android:
+donner une mission au robot

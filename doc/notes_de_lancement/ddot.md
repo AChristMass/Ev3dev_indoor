@@ -1,14 +1,47 @@
-# Nom d'équipe : AChristMass
-
-* Chef d'équipe : Christophe CALLE 
-* Responsables contact client : Christian NJEIM, Massicilia YAHIAOUI 
-* Responsables qualité : Augustin DEROIN, Christophe CALLE 
-* Responsable site web : Massiwayne CHIKIROU 
-* Experts techniques : Massiwayne CHIKIROU, Christophe CALLE 
-* Experts métiers : Augustin DEROIN, Christian NJEIM, Massicilia YAHIAOUI
+I
 
 # Outils:
 
-Communication : Discord
-Gestion de projet : Git et Github
-Gestion de documents et wiki : Github
+## Communication
+
+**Envisagés** 
+Skype
+Slack
+Whatsapp
+Discord
+
+**Retenu**
+Discord
+
+## Gestion de projet
+
+**Envisagés**
+Gitlab
+Github
+Dropbox
+Bitbucket
+Google Drive
+
+**Retenu**
+Github
+
+## Gestion de documents et wiki
+
+**Envisagés**
+Wix
+Blogspot
+Wordpress
+Github Pages
+
+**Retenu**
+Github Pages
+
+## Planning
+
+**Envisagés**
+Google agenda
+Outlook agenda
+Github issues
+
+**Retenu**
+Github issues
